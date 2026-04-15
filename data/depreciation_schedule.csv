@@ -1,0 +1,91 @@
+asset_id,asset_name,category,period,depreciation,accum_dep_close,nbv_close
+FA001,Leasehold Improvements – Level 5,Leasehold Improvements,2025-07,3750.0,183750.0,266250.0
+FA001,Leasehold Improvements – Level 5,Leasehold Improvements,2025-08,3750.0,187500.0,262500.0
+FA001,Leasehold Improvements – Level 5,Leasehold Improvements,2025-09,3750.0,191250.0,258750.0
+FA001,Leasehold Improvements – Level 5,Leasehold Improvements,2025-10,3750.0,195000.0,255000.0
+FA001,Leasehold Improvements – Level 5,Leasehold Improvements,2025-11,3750.0,198750.0,251250.0
+FA001,Leasehold Improvements – Level 5,Leasehold Improvements,2025-12,3750.0,202500.0,247500.0
+FA001,Leasehold Improvements – Level 5,Leasehold Improvements,2026-01,3750.0,206250.0,243750.0
+FA001,Leasehold Improvements – Level 5,Leasehold Improvements,2026-02,3750.0,210000.0,240000.0
+FA001,Leasehold Improvements – Level 5,Leasehold Improvements,2026-03,3750.0,213750.0,236250.0
+FA002,Leasehold Improvements – Level 6,Leasehold Improvements,2025-07,2666.67,114666.81,205333.19
+FA002,Leasehold Improvements – Level 6,Leasehold Improvements,2025-08,2666.67,117333.48,202666.52
+FA002,Leasehold Improvements – Level 6,Leasehold Improvements,2025-09,2666.67,120000.15,199999.85
+FA002,Leasehold Improvements – Level 6,Leasehold Improvements,2025-10,2666.67,122666.82,197333.18
+FA002,Leasehold Improvements – Level 6,Leasehold Improvements,2025-11,2666.67,125333.49,194666.51
+FA002,Leasehold Improvements – Level 6,Leasehold Improvements,2025-12,2666.67,128000.16,191999.84
+FA002,Leasehold Improvements – Level 6,Leasehold Improvements,2026-01,2666.67,130666.83,189333.17
+FA002,Leasehold Improvements – Level 6,Leasehold Improvements,2026-02,2666.67,133333.5,186666.5
+FA002,Leasehold Improvements – Level 6,Leasehold Improvements,2026-03,2666.67,136000.17,183999.83
+FA003,Server Infrastructure,IT Equipment,2025-07,4666.67,191333.47,88666.53
+FA003,Server Infrastructure,IT Equipment,2025-08,4666.67,196000.14,83999.86
+FA003,Server Infrastructure,IT Equipment,2025-09,4666.67,200666.81,79333.19
+FA003,Server Infrastructure,IT Equipment,2025-10,4666.67,205333.48,74666.52
+FA003,Server Infrastructure,IT Equipment,2025-11,4666.67,210000.15,69999.85
+FA003,Server Infrastructure,IT Equipment,2025-12,4666.67,214666.82,65333.18
+FA003,Server Infrastructure,IT Equipment,2026-01,4666.67,219333.49,60666.51
+FA003,Server Infrastructure,IT Equipment,2026-02,4666.67,224000.16,55999.84
+FA003,Server Infrastructure,IT Equipment,2026-03,4666.67,228666.83,51333.17
+FA004,Workstations & Laptops (Batch A),IT Equipment,2025-07,2638.89,65972.25,29027.75
+FA004,Workstations & Laptops (Batch A),IT Equipment,2025-08,2638.89,68611.14,26388.86
+FA004,Workstations & Laptops (Batch A),IT Equipment,2025-09,2638.89,71250.03,23749.97
+FA004,Workstations & Laptops (Batch A),IT Equipment,2025-10,2638.89,73888.92,21111.08
+FA004,Workstations & Laptops (Batch A),IT Equipment,2025-11,2638.89,76527.81,18472.19
+FA004,Workstations & Laptops (Batch A),IT Equipment,2025-12,2638.89,79166.7,15833.3
+FA004,Workstations & Laptops (Batch A),IT Equipment,2026-01,2638.89,81805.59,13194.41
+FA004,Workstations & Laptops (Batch A),IT Equipment,2026-02,2638.89,84444.48,10555.52
+FA004,Workstations & Laptops (Batch A),IT Equipment,2026-03,2638.89,87083.37,7916.63
+FA005,Workstations & Laptops (Batch B),IT Equipment,2025-07,2444.44,31777.72,56222.28
+FA005,Workstations & Laptops (Batch B),IT Equipment,2025-08,2444.44,34222.16,53777.84
+FA005,Workstations & Laptops (Batch B),IT Equipment,2025-09,2444.44,36666.6,51333.4
+FA005,Workstations & Laptops (Batch B),IT Equipment,2025-10,2444.44,39111.04,48888.96
+FA005,Workstations & Laptops (Batch B),IT Equipment,2025-11,2444.44,41555.48,46444.52
+FA005,Workstations & Laptops (Batch B),IT Equipment,2025-12,2444.44,43999.92,44000.08
+FA005,Workstations & Laptops (Batch B),IT Equipment,2026-01,2444.44,46444.36,41555.64
+FA005,Workstations & Laptops (Batch B),IT Equipment,2026-02,2444.44,48888.8,39111.2
+FA005,Workstations & Laptops (Batch B),IT Equipment,2026-03,2444.44,51333.24,36666.76
+FA006,AV & Conference Equipment,Furniture & Fittings,2025-07,738.09,25833.15,36166.85
+FA006,AV & Conference Equipment,Furniture & Fittings,2025-08,738.09,26571.24,35428.76
+FA006,AV & Conference Equipment,Furniture & Fittings,2025-09,738.09,27309.33,34690.67
+FA006,AV & Conference Equipment,Furniture & Fittings,2025-10,738.09,28047.42,33952.58
+FA006,AV & Conference Equipment,Furniture & Fittings,2025-11,738.09,28785.51,33214.49
+FA006,AV & Conference Equipment,Furniture & Fittings,2025-12,738.09,29523.6,32476.4
+FA006,AV & Conference Equipment,Furniture & Fittings,2026-01,738.09,30261.69,31738.31
+FA006,AV & Conference Equipment,Furniture & Fittings,2026-02,738.09,30999.78,31000.22
+FA006,AV & Conference Equipment,Furniture & Fittings,2026-03,738.09,31737.87,30262.13
+FA007,Office Furniture – Level 5,Furniture & Fittings,2025-07,400.0,19600.0,28400.0
+FA007,Office Furniture – Level 5,Furniture & Fittings,2025-08,400.0,20000.0,28000.0
+FA007,Office Furniture – Level 5,Furniture & Fittings,2025-09,400.0,20400.0,27600.0
+FA007,Office Furniture – Level 5,Furniture & Fittings,2025-10,400.0,20800.0,27200.0
+FA007,Office Furniture – Level 5,Furniture & Fittings,2025-11,400.0,21200.0,26800.0
+FA007,Office Furniture – Level 5,Furniture & Fittings,2025-12,400.0,21600.0,26400.0
+FA007,Office Furniture – Level 5,Furniture & Fittings,2026-01,400.0,22000.0,26000.0
+FA007,Office Furniture – Level 5,Furniture & Fittings,2026-02,400.0,22400.0,25600.0
+FA007,Office Furniture – Level 5,Furniture & Fittings,2026-03,400.0,22800.0,25200.0
+FA008,Office Furniture – Level 6,Furniture & Fittings,2025-07,291.67,12541.81,22458.19
+FA008,Office Furniture – Level 6,Furniture & Fittings,2025-08,291.67,12833.48,22166.52
+FA008,Office Furniture – Level 6,Furniture & Fittings,2025-09,291.67,13125.15,21874.85
+FA008,Office Furniture – Level 6,Furniture & Fittings,2025-10,291.67,13416.82,21583.18
+FA008,Office Furniture – Level 6,Furniture & Fittings,2025-11,291.67,13708.49,21291.51
+FA008,Office Furniture – Level 6,Furniture & Fittings,2025-12,291.67,14000.16,20999.84
+FA008,Office Furniture – Level 6,Furniture & Fittings,2026-01,291.67,14291.83,20708.17
+FA008,Office Furniture – Level 6,Furniture & Fittings,2026-02,291.67,14583.5,20416.5
+FA008,Office Furniture – Level 6,Furniture & Fittings,2026-03,291.67,14875.17,20124.83
+FA009,Learning Management System,Software,2025-07,2500.0,77500.0,72500.0
+FA009,Learning Management System,Software,2025-08,2500.0,80000.0,70000.0
+FA009,Learning Management System,Software,2025-09,2500.0,82500.0,67500.0
+FA009,Learning Management System,Software,2025-10,2500.0,85000.0,65000.0
+FA009,Learning Management System,Software,2025-11,2500.0,87500.0,62500.0
+FA009,Learning Management System,Software,2025-12,2500.0,90000.0,60000.0
+FA009,Learning Management System,Software,2026-01,2500.0,92500.0,57500.0
+FA009,Learning Management System,Software,2026-02,2500.0,95000.0,55000.0
+FA009,Learning Management System,Software,2026-03,2500.0,97500.0,52500.0
+FA010,Fleet Vehicle – Toyota HiLux,Motor Vehicles,2025-07,916.67,22916.75,32083.25
+FA010,Fleet Vehicle – Toyota HiLux,Motor Vehicles,2025-08,916.67,23833.42,31166.58
+FA010,Fleet Vehicle – Toyota HiLux,Motor Vehicles,2025-09,916.67,24750.09,30249.91
+FA010,Fleet Vehicle – Toyota HiLux,Motor Vehicles,2025-10,916.67,25666.76,29333.24
+FA010,Fleet Vehicle – Toyota HiLux,Motor Vehicles,2025-11,916.67,26583.43,28416.57
+FA010,Fleet Vehicle – Toyota HiLux,Motor Vehicles,2025-12,916.67,27500.1,27499.9
+FA010,Fleet Vehicle – Toyota HiLux,Motor Vehicles,2026-01,916.67,28416.77,26583.23
+FA010,Fleet Vehicle – Toyota HiLux,Motor Vehicles,2026-02,916.67,29333.44,25666.56
+FA010,Fleet Vehicle – Toyota HiLux,Motor Vehicles,2026-03,916.67,30250.11,24749.89

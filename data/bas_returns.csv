@@ -1,0 +1,4 @@
+quarter,period_from,period_to,gst_collected,gst_itc,net_gst,withheld_tax_payg,total_payable,due_date,lodged_date,lodgement_status,payment_status
+Q1 FY2026,2025-07,2025-09,183940.65,53146.29,130794.36,12625.96,143420.32,2025-10-28,2025-10-25,Lodged,Paid
+Q2 FY2026,2025-10,2025-12,176897.34,51959.65,124937.69,12409.18,137346.87,2026-01-28,2026-01-25,Lodged,Paid
+Q3 FY2026,2026-01,2026-03,185705.05,52953.12,132751.93,9362.67,142114.6,2026-04-28,,Due,Pending

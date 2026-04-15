@@ -1,0 +1,253 @@
+journal_id,period,journal_date,account_code,cost_centre,description,debit,credit,journal_type,posted_by
+JE01001,2025-07,2025-07-31,1001,CC001,Revenue recognition – Course Fees – Domestic,572397.74,0.0,Revenue,System
+JE01001,2025-07,2025-07-31,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,572397.74,Revenue,System
+JE01002,2025-07,2025-07-31,1001,CC001,Revenue recognition – Course Fees – International,368541.93,0.0,Revenue,System
+JE01002,2025-07,2025-07-31,4002,CC001,Revenue recognition – Course Fees – International,0.0,368541.93,Revenue,System
+JE01003,2025-07,2025-07-31,1001,CC003,Revenue recognition – Consulting & Advisory Revenue,112886.84,0.0,Revenue,System
+JE01003,2025-07,2025-07-31,4003,CC003,Revenue recognition – Consulting & Advisory Revenue,0.0,112886.84,Revenue,System
+JE01004,2025-07,2025-07-31,1001,CC007,Revenue recognition – Government Grants,78509.92,0.0,Revenue,System
+JE01004,2025-07,2025-07-31,4004,CC007,Revenue recognition – Government Grants,0.0,78509.92,Revenue,System
+JE01005,2025-07,2025-07-31,1001,CC003,Revenue recognition – Other Income,11744.82,0.0,Revenue,System
+JE01005,2025-07,2025-07-31,4005,CC003,Revenue recognition – Other Income,0.0,11744.82,Revenue,System
+JE01006,2025-07,2025-07-31,5001,CC003,Salaries & wages – monthly payroll,593047.64,0.0,Payroll,Finance_Team
+JE01006,2025-07,2025-07-31,2101,CC003,Salaries & wages – monthly payroll,0.0,593047.64,Payroll,Finance_Team
+JE01007,2025-07,2025-07-31,5003,CC003,Superannuation – monthly payroll,71165.72,0.0,Payroll,Finance_Team
+JE01007,2025-07,2025-07-31,2101,CC003,Superannuation – monthly payroll,0.0,71165.72,Payroll,Finance_Team
+JE01008,2025-07,2025-07-31,5002,CC003,Payroll tax – VIC,28762.81,0.0,Payroll,Finance_Team
+JE01008,2025-07,2025-07-31,2101,CC003,Payroll tax – VIC,0.0,28762.81,Payroll,Finance_Team
+JE01009,2025-07,2025-07-31,5200,CC006,Occupancy expenses – 2025-07,65996.96,0.0,Expense,Finance_Team
+JE01009,2025-07,2025-07-31,2001,CC006,Occupancy expenses – 2025-07,0.0,65996.96,Expense,Finance_Team
+JE01010,2025-07,2025-07-31,5201,CC004,IT & technology costs – 2025-07,40930.65,0.0,Expense,Finance_Team
+JE01010,2025-07,2025-07-31,2001,CC004,IT & technology costs – 2025-07,0.0,40930.65,Expense,Finance_Team
+JE01011,2025-07,2025-07-31,5202,CC005,Marketing & communications – 2025-07,26915.21,0.0,Expense,Finance_Team
+JE01011,2025-07,2025-07-31,2001,CC005,Marketing & communications – 2025-07,0.0,26915.21,Expense,Finance_Team
+JE01012,2025-07,2025-07-31,5203,CC003,Professional services – 2025-07,35927.08,0.0,Expense,Finance_Team
+JE01012,2025-07,2025-07-31,2001,CC003,Professional services – 2025-07,0.0,35927.08,Expense,Finance_Team
+JE01013,2025-07,2025-07-31,5204,CC007,Travel & entertainment – 2025-07,12464.6,0.0,Expense,Finance_Team
+JE01013,2025-07,2025-07-31,2001,CC007,Travel & entertainment – 2025-07,0.0,12464.6,Expense,Finance_Team
+JE01014,2025-07,2025-07-31,5300,CC003,Intercompany charge – RMIT University shared services,90817.79,0.0,Intercompany,Finance_Team
+JE01014,2025-07,2025-07-31,2400,CC003,Intercompany charge – RMIT University shared services,0.0,90817.79,Intercompany,Finance_Team
+JE01015,2025-08,2025-08-31,1001,CC001,Revenue recognition – Course Fees – Domestic,544415.91,0.0,Revenue,System
+JE01015,2025-08,2025-08-31,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,544415.91,Revenue,System
+JE01016,2025-08,2025-08-31,1001,CC001,Revenue recognition – Course Fees – International,343210.14,0.0,Revenue,System
+JE01016,2025-08,2025-08-31,4002,CC001,Revenue recognition – Course Fees – International,0.0,343210.14,Revenue,System
+JE01017,2025-08,2025-08-31,1001,CC003,Revenue recognition – Consulting & Advisory Revenue,97116.78,0.0,Revenue,System
+JE01017,2025-08,2025-08-31,4003,CC003,Revenue recognition – Consulting & Advisory Revenue,0.0,97116.78,Revenue,System
+JE01018,2025-08,2025-08-31,1001,CC007,Revenue recognition – Government Grants,69926.69,0.0,Revenue,System
+JE01018,2025-08,2025-08-31,4004,CC007,Revenue recognition – Government Grants,0.0,69926.69,Revenue,System
+JE01019,2025-08,2025-08-31,1001,CC003,Revenue recognition – Other Income,12492.68,0.0,Revenue,System
+JE01019,2025-08,2025-08-31,4005,CC003,Revenue recognition – Other Income,0.0,12492.68,Revenue,System
+JE01020,2025-08,2025-08-31,5001,CC003,Salaries & wages – monthly payroll,643599.45,0.0,Payroll,Finance_Team
+JE01020,2025-08,2025-08-31,2101,CC003,Salaries & wages – monthly payroll,0.0,643599.45,Payroll,Finance_Team
+JE01021,2025-08,2025-08-31,5003,CC003,Superannuation – monthly payroll,77231.93,0.0,Payroll,Finance_Team
+JE01021,2025-08,2025-08-31,2101,CC003,Superannuation – monthly payroll,0.0,77231.93,Payroll,Finance_Team
+JE01022,2025-08,2025-08-31,5002,CC003,Payroll tax – VIC,31214.57,0.0,Payroll,Finance_Team
+JE01022,2025-08,2025-08-31,2101,CC003,Payroll tax – VIC,0.0,31214.57,Payroll,Finance_Team
+JE01023,2025-08,2025-08-31,5200,CC006,Occupancy expenses – 2025-08,65124.97,0.0,Expense,Finance_Team
+JE01023,2025-08,2025-08-31,2001,CC006,Occupancy expenses – 2025-08,0.0,65124.97,Expense,Finance_Team
+JE01024,2025-08,2025-08-31,5201,CC004,IT & technology costs – 2025-08,41574.71,0.0,Expense,Finance_Team
+JE01024,2025-08,2025-08-31,2001,CC004,IT & technology costs – 2025-08,0.0,41574.71,Expense,Finance_Team
+JE01025,2025-08,2025-08-31,5202,CC005,Marketing & communications – 2025-08,30658.88,0.0,Expense,Finance_Team
+JE01025,2025-08,2025-08-31,2001,CC005,Marketing & communications – 2025-08,0.0,30658.88,Expense,Finance_Team
+JE01026,2025-08,2025-08-31,5203,CC003,Professional services – 2025-08,23371.64,0.0,Expense,Finance_Team
+JE01026,2025-08,2025-08-31,2001,CC003,Professional services – 2025-08,0.0,23371.64,Expense,Finance_Team
+JE01027,2025-08,2025-08-31,5204,CC007,Travel & entertainment – 2025-08,11375.45,0.0,Expense,Finance_Team
+JE01027,2025-08,2025-08-31,2001,CC007,Travel & entertainment – 2025-08,0.0,11375.45,Expense,Finance_Team
+JE01028,2025-08,2025-08-31,5300,CC003,Intercompany charge – RMIT University shared services,87451.81,0.0,Intercompany,Finance_Team
+JE01028,2025-08,2025-08-31,2400,CC003,Intercompany charge – RMIT University shared services,0.0,87451.81,Intercompany,Finance_Team
+JE01029,2025-09,2025-09-30,1001,CC001,Revenue recognition – Course Fees – Domestic,645835.11,0.0,Revenue,System
+JE01029,2025-09,2025-09-30,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,645835.11,Revenue,System
+JE01030,2025-09,2025-09-30,1001,CC001,Revenue recognition – Course Fees – International,398187.41,0.0,Revenue,System
+JE01030,2025-09,2025-09-30,4002,CC001,Revenue recognition – Course Fees – International,0.0,398187.41,Revenue,System
+JE01031,2025-09,2025-09-30,1001,CC003,Revenue recognition – Consulting & Advisory Revenue,127266.0,0.0,Revenue,System
+JE01031,2025-09,2025-09-30,4003,CC003,Revenue recognition – Consulting & Advisory Revenue,0.0,127266.0,Revenue,System
+JE01032,2025-09,2025-09-30,1001,CC007,Revenue recognition – Government Grants,76241.07,0.0,Revenue,System
+JE01032,2025-09,2025-09-30,4004,CC007,Revenue recognition – Government Grants,0.0,76241.07,Revenue,System
+JE01033,2025-09,2025-09-30,1001,CC003,Revenue recognition – Other Income,13564.65,0.0,Revenue,System
+JE01033,2025-09,2025-09-30,4005,CC003,Revenue recognition – Other Income,0.0,13564.65,Revenue,System
+JE01034,2025-09,2025-09-30,5001,CC003,Salaries & wages – monthly payroll,599962.0,0.0,Payroll,Finance_Team
+JE01034,2025-09,2025-09-30,2101,CC003,Salaries & wages – monthly payroll,0.0,599962.0,Payroll,Finance_Team
+JE01035,2025-09,2025-09-30,5003,CC003,Superannuation – monthly payroll,71995.44,0.0,Payroll,Finance_Team
+JE01035,2025-09,2025-09-30,2101,CC003,Superannuation – monthly payroll,0.0,71995.44,Payroll,Finance_Team
+JE01036,2025-09,2025-09-30,5002,CC003,Payroll tax – VIC,29098.16,0.0,Payroll,Finance_Team
+JE01036,2025-09,2025-09-30,2101,CC003,Payroll tax – VIC,0.0,29098.16,Payroll,Finance_Team
+JE01037,2025-09,2025-09-30,5200,CC006,Occupancy expenses – 2025-09,66704.75,0.0,Expense,Finance_Team
+JE01037,2025-09,2025-09-30,2001,CC006,Occupancy expenses – 2025-09,0.0,66704.75,Expense,Finance_Team
+JE01038,2025-09,2025-09-30,5201,CC004,IT & technology costs – 2025-09,35941.92,0.0,Expense,Finance_Team
+JE01038,2025-09,2025-09-30,2001,CC004,IT & technology costs – 2025-09,0.0,35941.92,Expense,Finance_Team
+JE01039,2025-09,2025-09-30,5202,CC005,Marketing & communications – 2025-09,14900.27,0.0,Expense,Finance_Team
+JE01039,2025-09,2025-09-30,2001,CC005,Marketing & communications – 2025-09,0.0,14900.27,Expense,Finance_Team
+JE01040,2025-09,2025-09-30,5203,CC003,Professional services – 2025-09,30144.87,0.0,Expense,Finance_Team
+JE01040,2025-09,2025-09-30,2001,CC003,Professional services – 2025-09,0.0,30144.87,Expense,Finance_Team
+JE01041,2025-09,2025-09-30,5204,CC007,Travel & entertainment – 2025-09,10168.38,0.0,Expense,Finance_Team
+JE01041,2025-09,2025-09-30,2001,CC007,Travel & entertainment – 2025-09,0.0,10168.38,Expense,Finance_Team
+JE01042,2025-09,2025-09-30,5300,CC003,Intercompany charge – RMIT University shared services,89380.06,0.0,Intercompany,Finance_Team
+JE01042,2025-09,2025-09-30,2400,CC003,Intercompany charge – RMIT University shared services,0.0,89380.06,Intercompany,Finance_Team
+JE01043,2025-10,2025-10-31,1001,CC001,Revenue recognition – Course Fees – Domestic,496606.65,0.0,Revenue,System
+JE01043,2025-10,2025-10-31,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,496606.65,Revenue,System
+JE01044,2025-10,2025-10-31,1001,CC001,Revenue recognition – Course Fees – International,285618.51,0.0,Revenue,System
+JE01044,2025-10,2025-10-31,4002,CC001,Revenue recognition – Course Fees – International,0.0,285618.51,Revenue,System
+JE01045,2025-10,2025-10-31,1001,CC003,Revenue recognition – Consulting & Advisory Revenue,103473.61,0.0,Revenue,System
+JE01045,2025-10,2025-10-31,4003,CC003,Revenue recognition – Consulting & Advisory Revenue,0.0,103473.61,Revenue,System
+JE01046,2025-10,2025-10-31,1001,CC007,Revenue recognition – Government Grants,69988.99,0.0,Revenue,System
+JE01046,2025-10,2025-10-31,4004,CC007,Revenue recognition – Government Grants,0.0,69988.99,Revenue,System
+JE01047,2025-10,2025-10-31,1001,CC003,Revenue recognition – Other Income,11827.51,0.0,Revenue,System
+JE01047,2025-10,2025-10-31,4005,CC003,Revenue recognition – Other Income,0.0,11827.51,Revenue,System
+JE01048,2025-10,2025-10-31,5001,CC003,Salaries & wages – monthly payroll,614709.8,0.0,Payroll,Finance_Team
+JE01048,2025-10,2025-10-31,2101,CC003,Salaries & wages – monthly payroll,0.0,614709.8,Payroll,Finance_Team
+JE01049,2025-10,2025-10-31,5003,CC003,Superannuation – monthly payroll,73765.18,0.0,Payroll,Finance_Team
+JE01049,2025-10,2025-10-31,2101,CC003,Superannuation – monthly payroll,0.0,73765.18,Payroll,Finance_Team
+JE01050,2025-10,2025-10-31,5002,CC003,Payroll tax – VIC,29813.43,0.0,Payroll,Finance_Team
+JE01050,2025-10,2025-10-31,2101,CC003,Payroll tax – VIC,0.0,29813.43,Payroll,Finance_Team
+JE01051,2025-10,2025-10-31,5200,CC006,Occupancy expenses – 2025-10,65343.26,0.0,Expense,Finance_Team
+JE01051,2025-10,2025-10-31,2001,CC006,Occupancy expenses – 2025-10,0.0,65343.26,Expense,Finance_Team
+JE01052,2025-10,2025-10-31,5201,CC004,IT & technology costs – 2025-10,45274.55,0.0,Expense,Finance_Team
+JE01052,2025-10,2025-10-31,2001,CC004,IT & technology costs – 2025-10,0.0,45274.55,Expense,Finance_Team
+JE01053,2025-10,2025-10-31,5202,CC005,Marketing & communications – 2025-10,31192.07,0.0,Expense,Finance_Team
+JE01053,2025-10,2025-10-31,2001,CC005,Marketing & communications – 2025-10,0.0,31192.07,Expense,Finance_Team
+JE01054,2025-10,2025-10-31,5203,CC003,Professional services – 2025-10,37799.08,0.0,Expense,Finance_Team
+JE01054,2025-10,2025-10-31,2001,CC003,Professional services – 2025-10,0.0,37799.08,Expense,Finance_Team
+JE01055,2025-10,2025-10-31,5204,CC007,Travel & entertainment – 2025-10,13299.9,0.0,Expense,Finance_Team
+JE01055,2025-10,2025-10-31,2001,CC007,Travel & entertainment – 2025-10,0.0,13299.9,Expense,Finance_Team
+JE01056,2025-10,2025-10-31,5300,CC003,Intercompany charge – RMIT University shared services,87392.46,0.0,Intercompany,Finance_Team
+JE01056,2025-10,2025-10-31,2400,CC003,Intercompany charge – RMIT University shared services,0.0,87392.46,Intercompany,Finance_Team
+JE01057,2025-11,2025-11-30,1001,CC001,Revenue recognition – Course Fees – Domestic,416325.36,0.0,Revenue,System
+JE01057,2025-11,2025-11-30,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,416325.36,Revenue,System
+JE01058,2025-11,2025-11-30,1001,CC001,Revenue recognition – Course Fees – International,264652.58,0.0,Revenue,System
+JE01058,2025-11,2025-11-30,4002,CC001,Revenue recognition – Course Fees – International,0.0,264652.58,Revenue,System
+JE01059,2025-11,2025-11-30,1001,CC003,Revenue recognition – Consulting & Advisory Revenue,80800.32,0.0,Revenue,System
+JE01059,2025-11,2025-11-30,4003,CC003,Revenue recognition – Consulting & Advisory Revenue,0.0,80800.32,Revenue,System
+JE01060,2025-11,2025-11-30,1001,CC007,Revenue recognition – Government Grants,77496.63,0.0,Revenue,System
+JE01060,2025-11,2025-11-30,4004,CC007,Revenue recognition – Government Grants,0.0,77496.63,Revenue,System
+JE01061,2025-11,2025-11-30,1001,CC003,Revenue recognition – Other Income,11499.77,0.0,Revenue,System
+JE01061,2025-11,2025-11-30,4005,CC003,Revenue recognition – Other Income,0.0,11499.77,Revenue,System
+JE01062,2025-11,2025-11-30,5001,CC003,Salaries & wages – monthly payroll,662043.58,0.0,Payroll,Finance_Team
+JE01062,2025-11,2025-11-30,2101,CC003,Salaries & wages – monthly payroll,0.0,662043.58,Payroll,Finance_Team
+JE01063,2025-11,2025-11-30,5003,CC003,Superannuation – monthly payroll,79445.23,0.0,Payroll,Finance_Team
+JE01063,2025-11,2025-11-30,2101,CC003,Superannuation – monthly payroll,0.0,79445.23,Payroll,Finance_Team
+JE01064,2025-11,2025-11-30,5002,CC003,Payroll tax – VIC,32109.11,0.0,Payroll,Finance_Team
+JE01064,2025-11,2025-11-30,2101,CC003,Payroll tax – VIC,0.0,32109.11,Payroll,Finance_Team
+JE01065,2025-11,2025-11-30,5200,CC006,Occupancy expenses – 2025-11,62542.12,0.0,Expense,Finance_Team
+JE01065,2025-11,2025-11-30,2001,CC006,Occupancy expenses – 2025-11,0.0,62542.12,Expense,Finance_Team
+JE01066,2025-11,2025-11-30,5201,CC004,IT & technology costs – 2025-11,37604.5,0.0,Expense,Finance_Team
+JE01066,2025-11,2025-11-30,2001,CC004,IT & technology costs – 2025-11,0.0,37604.5,Expense,Finance_Team
+JE01067,2025-11,2025-11-30,5202,CC005,Marketing & communications – 2025-11,31842.37,0.0,Expense,Finance_Team
+JE01067,2025-11,2025-11-30,2001,CC005,Marketing & communications – 2025-11,0.0,31842.37,Expense,Finance_Team
+JE01068,2025-11,2025-11-30,5203,CC003,Professional services – 2025-11,46374.8,0.0,Expense,Finance_Team
+JE01068,2025-11,2025-11-30,2001,CC003,Professional services – 2025-11,0.0,46374.8,Expense,Finance_Team
+JE01069,2025-11,2025-11-30,5204,CC007,Travel & entertainment – 2025-11,13011.39,0.0,Expense,Finance_Team
+JE01069,2025-11,2025-11-30,2001,CC007,Travel & entertainment – 2025-11,0.0,13011.39,Expense,Finance_Team
+JE01070,2025-11,2025-11-30,5300,CC003,Intercompany charge – RMIT University shared services,89179.09,0.0,Intercompany,Finance_Team
+JE01070,2025-11,2025-11-30,2400,CC003,Intercompany charge – RMIT University shared services,0.0,89179.09,Intercompany,Finance_Team
+JE01071,2025-12,2025-12-31,1001,CC001,Revenue recognition – Course Fees – Domestic,371658.62,0.0,Revenue,System
+JE01071,2025-12,2025-12-31,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,371658.62,Revenue,System
+JE01072,2025-12,2025-12-31,1001,CC001,Revenue recognition – Course Fees – International,215119.45,0.0,Revenue,System
+JE01072,2025-12,2025-12-31,4002,CC001,Revenue recognition – Course Fees – International,0.0,215119.45,Revenue,System
+JE01073,2025-12,2025-12-31,1001,CC003,Revenue recognition – Consulting & Advisory Revenue,52270.41,0.0,Revenue,System
+JE01073,2025-12,2025-12-31,4003,CC003,Revenue recognition – Consulting & Advisory Revenue,0.0,52270.41,Revenue,System
+JE01074,2025-12,2025-12-31,1001,CC007,Revenue recognition – Government Grants,72339.62,0.0,Revenue,System
+JE01074,2025-12,2025-12-31,4004,CC007,Revenue recognition – Government Grants,0.0,72339.62,Revenue,System
+JE01075,2025-12,2025-12-31,1001,CC003,Revenue recognition – Other Income,13905.79,0.0,Revenue,System
+JE01075,2025-12,2025-12-31,4005,CC003,Revenue recognition – Other Income,0.0,13905.79,Revenue,System
+JE01076,2025-12,2025-12-31,5001,CC003,Salaries & wages – monthly payroll,594013.79,0.0,Payroll,Finance_Team
+JE01076,2025-12,2025-12-31,2101,CC003,Salaries & wages – monthly payroll,0.0,594013.79,Payroll,Finance_Team
+JE01077,2025-12,2025-12-31,5003,CC003,Superannuation – monthly payroll,71281.65,0.0,Payroll,Finance_Team
+JE01077,2025-12,2025-12-31,2101,CC003,Superannuation – monthly payroll,0.0,71281.65,Payroll,Finance_Team
+JE01078,2025-12,2025-12-31,5002,CC003,Payroll tax – VIC,28809.67,0.0,Payroll,Finance_Team
+JE01078,2025-12,2025-12-31,2101,CC003,Payroll tax – VIC,0.0,28809.67,Payroll,Finance_Team
+JE01079,2025-12,2025-12-31,5200,CC006,Occupancy expenses – 2025-12,65100.59,0.0,Expense,Finance_Team
+JE01079,2025-12,2025-12-31,2001,CC006,Occupancy expenses – 2025-12,0.0,65100.59,Expense,Finance_Team
+JE01080,2025-12,2025-12-31,5201,CC004,IT & technology costs – 2025-12,43012.95,0.0,Expense,Finance_Team
+JE01080,2025-12,2025-12-31,2001,CC004,IT & technology costs – 2025-12,0.0,43012.95,Expense,Finance_Team
+JE01081,2025-12,2025-12-31,5202,CC005,Marketing & communications – 2025-12,26422.04,0.0,Expense,Finance_Team
+JE01081,2025-12,2025-12-31,2001,CC005,Marketing & communications – 2025-12,0.0,26422.04,Expense,Finance_Team
+JE01082,2025-12,2025-12-31,5203,CC003,Professional services – 2025-12,40789.06,0.0,Expense,Finance_Team
+JE01082,2025-12,2025-12-31,2001,CC003,Professional services – 2025-12,0.0,40789.06,Expense,Finance_Team
+JE01083,2025-12,2025-12-31,5204,CC007,Travel & entertainment – 2025-12,13161.56,0.0,Expense,Finance_Team
+JE01083,2025-12,2025-12-31,2001,CC007,Travel & entertainment – 2025-12,0.0,13161.56,Expense,Finance_Team
+JE01084,2025-12,2025-12-31,5300,CC003,Intercompany charge – RMIT University shared services,96607.04,0.0,Intercompany,Finance_Team
+JE01084,2025-12,2025-12-31,2400,CC003,Intercompany charge – RMIT University shared services,0.0,96607.04,Intercompany,Finance_Team
+JE01085,2026-01,2026-01-31,1001,CC001,Revenue recognition – Course Fees – Domestic,543499.19,0.0,Revenue,System
+JE01085,2026-01,2026-01-31,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,543499.19,Revenue,System
+JE01086,2026-01,2026-01-31,1001,CC001,Revenue recognition – Course Fees – International,328811.93,0.0,Revenue,System
+JE01086,2026-01,2026-01-31,4002,CC001,Revenue recognition – Course Fees – International,0.0,328811.93,Revenue,System
+JE01087,2026-01,2026-01-31,1001,CC003,Revenue recognition – Consulting & Advisory Revenue,98882.02,0.0,Revenue,System
+JE01087,2026-01,2026-01-31,4003,CC003,Revenue recognition – Consulting & Advisory Revenue,0.0,98882.02,Revenue,System
+JE01088,2026-01,2026-01-31,1001,CC007,Revenue recognition – Government Grants,70842.09,0.0,Revenue,System
+JE01088,2026-01,2026-01-31,4004,CC007,Revenue recognition – Government Grants,0.0,70842.09,Revenue,System
+JE01089,2026-01,2026-01-31,1001,CC003,Revenue recognition – Other Income,13904.55,0.0,Revenue,System
+JE01089,2026-01,2026-01-31,4005,CC003,Revenue recognition – Other Income,0.0,13904.55,Revenue,System
+JE01090,2026-01,2026-01-31,5001,CC003,Salaries & wages – monthly payroll,609797.01,0.0,Payroll,Finance_Team
+JE01090,2026-01,2026-01-31,2101,CC003,Salaries & wages – monthly payroll,0.0,609797.01,Payroll,Finance_Team
+JE01091,2026-01,2026-01-31,5003,CC003,Superannuation – monthly payroll,73175.64,0.0,Payroll,Finance_Team
+JE01091,2026-01,2026-01-31,2101,CC003,Superannuation – monthly payroll,0.0,73175.64,Payroll,Finance_Team
+JE01092,2026-01,2026-01-31,5002,CC003,Payroll tax – VIC,29575.15,0.0,Payroll,Finance_Team
+JE01092,2026-01,2026-01-31,2101,CC003,Payroll tax – VIC,0.0,29575.15,Payroll,Finance_Team
+JE01093,2026-01,2026-01-31,5200,CC006,Occupancy expenses – 2026-01,64789.22,0.0,Expense,Finance_Team
+JE01093,2026-01,2026-01-31,2001,CC006,Occupancy expenses – 2026-01,0.0,64789.22,Expense,Finance_Team
+JE01094,2026-01,2026-01-31,5201,CC004,IT & technology costs – 2026-01,44997.21,0.0,Expense,Finance_Team
+JE01094,2026-01,2026-01-31,2001,CC004,IT & technology costs – 2026-01,0.0,44997.21,Expense,Finance_Team
+JE01095,2026-01,2026-01-31,5202,CC005,Marketing & communications – 2026-01,24382.69,0.0,Expense,Finance_Team
+JE01095,2026-01,2026-01-31,2001,CC005,Marketing & communications – 2026-01,0.0,24382.69,Expense,Finance_Team
+JE01096,2026-01,2026-01-31,5203,CC003,Professional services – 2026-01,32650.74,0.0,Expense,Finance_Team
+JE01096,2026-01,2026-01-31,2001,CC003,Professional services – 2026-01,0.0,32650.74,Expense,Finance_Team
+JE01097,2026-01,2026-01-31,5204,CC007,Travel & entertainment – 2026-01,8317.43,0.0,Expense,Finance_Team
+JE01097,2026-01,2026-01-31,2001,CC007,Travel & entertainment – 2026-01,0.0,8317.43,Expense,Finance_Team
+JE01098,2026-01,2026-01-31,5300,CC003,Intercompany charge – RMIT University shared services,79587.61,0.0,Intercompany,Finance_Team
+JE01098,2026-01,2026-01-31,2400,CC003,Intercompany charge – RMIT University shared services,0.0,79587.61,Intercompany,Finance_Team
+JE01099,2026-02,2026-02-28,1001,CC001,Revenue recognition – Course Fees – Domestic,465806.59,0.0,Revenue,System
+JE01099,2026-02,2026-02-28,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,465806.59,Revenue,System
+JE01100,2026-02,2026-02-28,1001,CC001,Revenue recognition – Course Fees – International,318315.22,0.0,Revenue,System
+JE01100,2026-02,2026-02-28,4002,CC001,Revenue recognition – Course Fees – International,0.0,318315.22,Revenue,System
+JE01101,2026-02,2026-02-28,1001,CC003,Revenue recognition – Consulting & Advisory Revenue,106934.93,0.0,Revenue,System
+JE01101,2026-02,2026-02-28,4003,CC003,Revenue recognition – Consulting & Advisory Revenue,0.0,106934.93,Revenue,System
+JE01102,2026-02,2026-02-28,1001,CC007,Revenue recognition – Government Grants,74907.67,0.0,Revenue,System
+JE01102,2026-02,2026-02-28,4004,CC007,Revenue recognition – Government Grants,0.0,74907.67,Revenue,System
+JE01103,2026-02,2026-02-28,1001,CC003,Revenue recognition – Other Income,12522.73,0.0,Revenue,System
+JE01103,2026-02,2026-02-28,4005,CC003,Revenue recognition – Other Income,0.0,12522.73,Revenue,System
+JE01104,2026-02,2026-02-28,5001,CC003,Salaries & wages – monthly payroll,623023.45,0.0,Payroll,Finance_Team
+JE01104,2026-02,2026-02-28,2101,CC003,Salaries & wages – monthly payroll,0.0,623023.45,Payroll,Finance_Team
+JE01105,2026-02,2026-02-28,5003,CC003,Superannuation – monthly payroll,74762.81,0.0,Payroll,Finance_Team
+JE01105,2026-02,2026-02-28,2101,CC003,Superannuation – monthly payroll,0.0,74762.81,Payroll,Finance_Team
+JE01106,2026-02,2026-02-28,5002,CC003,Payroll tax – VIC,30216.64,0.0,Payroll,Finance_Team
+JE01106,2026-02,2026-02-28,2101,CC003,Payroll tax – VIC,0.0,30216.64,Payroll,Finance_Team
+JE01107,2026-02,2026-02-28,5200,CC006,Occupancy expenses – 2026-02,68254.22,0.0,Expense,Finance_Team
+JE01107,2026-02,2026-02-28,2001,CC006,Occupancy expenses – 2026-02,0.0,68254.22,Expense,Finance_Team
+JE01108,2026-02,2026-02-28,5201,CC004,IT & technology costs – 2026-02,45573.42,0.0,Expense,Finance_Team
+JE01108,2026-02,2026-02-28,2001,CC004,IT & technology costs – 2026-02,0.0,45573.42,Expense,Finance_Team
+JE01109,2026-02,2026-02-28,5202,CC005,Marketing & communications – 2026-02,29368.47,0.0,Expense,Finance_Team
+JE01109,2026-02,2026-02-28,2001,CC005,Marketing & communications – 2026-02,0.0,29368.47,Expense,Finance_Team
+JE01110,2026-02,2026-02-28,5203,CC003,Professional services – 2026-02,26912.45,0.0,Expense,Finance_Team
+JE01110,2026-02,2026-02-28,2001,CC003,Professional services – 2026-02,0.0,26912.45,Expense,Finance_Team
+JE01111,2026-02,2026-02-28,5204,CC007,Travel & entertainment – 2026-02,13806.77,0.0,Expense,Finance_Team
+JE01111,2026-02,2026-02-28,2001,CC007,Travel & entertainment – 2026-02,0.0,13806.77,Expense,Finance_Team
+JE01112,2026-02,2026-02-28,5300,CC003,Intercompany charge – RMIT University shared services,86905.24,0.0,Intercompany,Finance_Team
+JE01112,2026-02,2026-02-28,2400,CC003,Intercompany charge – RMIT University shared services,0.0,86905.24,Intercompany,Finance_Team
+JE01113,2026-03,2026-03-31,1001,CC001,Revenue recognition – Course Fees – Domestic,606673.54,0.0,Revenue,System
+JE01113,2026-03,2026-03-31,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,606673.54,Revenue,System
+JE01114,2026-03,2026-03-31,1001,CC001,Revenue recognition – Course Fees – International,371401.87,0.0,Revenue,System
+JE01114,2026-03,2026-03-31,4002,CC001,Revenue recognition – Course Fees – International,0.0,371401.87,Revenue,System
+JE01115,2026-03,2026-03-31,1001,CC003,Revenue recognition – Consulting & Advisory Revenue,133531.01,0.0,Revenue,System
+JE01115,2026-03,2026-03-31,4003,CC003,Revenue recognition – Consulting & Advisory Revenue,0.0,133531.01,Revenue,System
+JE01116,2026-03,2026-03-31,1001,CC007,Revenue recognition – Government Grants,73205.62,0.0,Revenue,System
+JE01116,2026-03,2026-03-31,4004,CC007,Revenue recognition – Government Grants,0.0,73205.62,Revenue,System
+JE01117,2026-03,2026-03-31,1001,CC003,Revenue recognition – Other Income,15186.12,0.0,Revenue,System
+JE01117,2026-03,2026-03-31,4005,CC003,Revenue recognition – Other Income,0.0,15186.12,Revenue,System
+JE01118,2026-03,2026-03-31,5001,CC003,Salaries & wages – monthly payroll,622072.14,0.0,Payroll,Finance_Team
+JE01118,2026-03,2026-03-31,2101,CC003,Salaries & wages – monthly payroll,0.0,622072.14,Payroll,Finance_Team
+JE01119,2026-03,2026-03-31,5003,CC003,Superannuation – monthly payroll,74648.66,0.0,Payroll,Finance_Team
+JE01119,2026-03,2026-03-31,2101,CC003,Superannuation – monthly payroll,0.0,74648.66,Payroll,Finance_Team
+JE01120,2026-03,2026-03-31,5002,CC003,Payroll tax – VIC,30170.5,0.0,Payroll,Finance_Team
+JE01120,2026-03,2026-03-31,2101,CC003,Payroll tax – VIC,0.0,30170.5,Payroll,Finance_Team
+JE01121,2026-03,2026-03-31,5200,CC006,Occupancy expenses – 2026-03,63451.19,0.0,Expense,Finance_Team
+JE01121,2026-03,2026-03-31,2001,CC006,Occupancy expenses – 2026-03,0.0,63451.19,Expense,Finance_Team
+JE01122,2026-03,2026-03-31,5201,CC004,IT & technology costs – 2026-03,37486.21,0.0,Expense,Finance_Team
+JE01122,2026-03,2026-03-31,2001,CC004,IT & technology costs – 2026-03,0.0,37486.21,Expense,Finance_Team
+JE01123,2026-03,2026-03-31,5202,CC005,Marketing & communications – 2026-03,27244.85,0.0,Expense,Finance_Team
+JE01123,2026-03,2026-03-31,2001,CC005,Marketing & communications – 2026-03,0.0,27244.85,Expense,Finance_Team
+JE01124,2026-03,2026-03-31,5203,CC003,Professional services – 2026-03,46386.57,0.0,Expense,Finance_Team
+JE01124,2026-03,2026-03-31,2001,CC003,Professional services – 2026-03,0.0,46386.57,Expense,Finance_Team
+JE01125,2026-03,2026-03-31,5204,CC007,Travel & entertainment – 2026-03,13632.75,0.0,Expense,Finance_Team
+JE01125,2026-03,2026-03-31,2001,CC007,Travel & entertainment – 2026-03,0.0,13632.75,Expense,Finance_Team
+JE01126,2026-03,2026-03-31,5300,CC003,Intercompany charge – RMIT University shared services,88444.42,0.0,Intercompany,Finance_Team
+JE01126,2026-03,2026-03-31,2400,CC003,Intercompany charge – RMIT University shared services,0.0,88444.42,Intercompany,Finance_Team

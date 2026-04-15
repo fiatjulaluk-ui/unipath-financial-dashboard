@@ -1,0 +1,16 @@
+customer_id,customer_name,customer_type,region,payment_terms_days
+CUST001,Melbourne City Council,Government,Domestic,30
+CUST002,Deloitte Australia,Corporate,Domestic,30
+CUST003,ANZ Banking Group,Corporate,Domestic,30
+CUST004,Dept. of Education Victoria,Government,Domestic,30
+CUST005,National Australia Bank,Corporate,Domestic,30
+CUST006,University of Melbourne,Education,Domestic,30
+CUST007,PwC Australia,Corporate,Domestic,30
+CUST008,State Government of Victoria,Government,Domestic,30
+CUST009,China Education Group,Education,International,45
+CUST010,Vietnam National University,Education,International,45
+CUST011,Singapore Management University,Education,International,45
+CUST012,India Skills Foundation,Education,International,45
+CUST013,BHP Group,Corporate,Domestic,30
+CUST014,Telstra Corporation,Corporate,Domestic,30
+CUST015,City of Yarra,Government,Domestic,30

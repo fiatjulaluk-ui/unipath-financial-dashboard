@@ -1,0 +1,24 @@
+# Python virtual environment
+venv/
+.venv/
+env/
+
+# SQLite database (auto-generated at runtime)
+data/*.db
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Windows launcher (not needed on Streamlit Cloud)
+run_dashboard.bat

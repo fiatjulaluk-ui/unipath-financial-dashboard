@@ -1,0 +1,8 @@
+config_key,description,category,rate_or_amount,effective_from
+SGC_RATE,Superannuation Guarantee Rate,Payroll,0.12,1 Jul 2025 — 12%
+VIC_PAYROLL_TAX_RATE,Victorian Payroll Tax Rate,Payroll,0.0485,Ongoing
+VIC_PAYROLL_TAX_THRESHOLD_ANN,Victorian Payroll Tax Annual Threshold,Payroll,1000000.0,1 Jul 2025 — increased to $1M
+GST_RATE,Goods & Services Tax Rate,GST,0.1,Ongoing
+FBT_GROSS_UP_TYPE1,FBT Gross-Up Rate – Type 1 Benefits,FBT,2.0802,FY2026
+FBT_GROSS_UP_TYPE2,FBT Gross-Up Rate – Type 2 Benefits,FBT,1.8868,FY2026
+FBT_RATE,Fringe Benefits Tax Rate,FBT,0.47,FY2026

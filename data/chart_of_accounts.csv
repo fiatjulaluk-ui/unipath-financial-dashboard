@@ -1,0 +1,40 @@
+account_code,account_name,account_type,report_section,normal_balance,is_active
+1001,Cash at Bank – Operating,Asset,Current Assets,Debit,1
+1002,Cash at Bank – Term Deposit,Asset,Current Assets,Debit,1
+1100,Accounts Receivable – Domestic,Asset,Current Assets,Debit,1
+1101,Accounts Receivable – International,Asset,Current Assets,Debit,1
+1102,Allowance for Doubtful Debts,Asset,Current Assets,Credit,1
+1200,Prepaid Expenses,Asset,Current Assets,Debit,1
+1201,GST Receivable,Asset,Current Assets,Debit,1
+1300,"Property, Plant & Equipment",Asset,Non-Current Assets,Debit,1
+1301,Accum. Depreciation – PP&E,Asset,Non-Current Assets,Credit,1
+1400,Right-of-Use Assets,Asset,Non-Current Assets,Debit,1
+1401,Accum. Depreciation – ROU,Asset,Non-Current Assets,Credit,1
+2001,Accounts Payable,Liability,Current Liabilities,Credit,1
+2100,Accrued Liabilities,Liability,Current Liabilities,Credit,1
+2101,Accrued Payroll,Liability,Current Liabilities,Credit,1
+2200,GST Payable,Liability,Current Liabilities,Credit,1
+2201,Payroll Tax Payable,Liability,Current Liabilities,Credit,1
+2202,FBT Payable,Liability,Current Liabilities,Credit,1
+2300,Deferred Revenue,Liability,Current Liabilities,Credit,1
+2400,Intercompany Payable – RMIT University,Liability,Current Liabilities,Credit,1
+2500,Lease Liabilities,Liability,Non-Current Liabilities,Credit,1
+3001,Retained Earnings,Equity,Equity,Credit,1
+3002,Current Year Earnings,Equity,Equity,Credit,1
+4001,Course Fees – Domestic,Revenue,Revenue,Credit,1
+4002,Course Fees – International,Revenue,Revenue,Credit,1
+4003,Consulting & Advisory Revenue,Revenue,Revenue,Credit,1
+4004,Government Grants,Revenue,Revenue,Credit,1
+4005,Other Income,Revenue,Revenue,Credit,1
+5001,Salaries & Wages,Expense,Employee Benefits,Debit,1
+5002,Payroll Tax,Expense,Employee Benefits,Debit,1
+5003,Superannuation,Expense,Employee Benefits,Debit,1
+5100,Depreciation – PP&E,Expense,Depreciation,Debit,1
+5101,Depreciation – ROU Assets,Expense,Depreciation,Debit,1
+5200,Occupancy Expenses,Expense,Operating Expenses,Debit,1
+5201,IT & Technology,Expense,Operating Expenses,Debit,1
+5202,Marketing & Communications,Expense,Operating Expenses,Debit,1
+5203,Professional Services,Expense,Operating Expenses,Debit,1
+5204,Travel & Entertainment,Expense,Operating Expenses,Debit,1
+5205,FBT Expense,Expense,Operating Expenses,Debit,1
+5300,Intercompany Charges – RMIT University,Expense,Intercompany,Debit,1

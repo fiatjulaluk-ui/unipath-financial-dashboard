@@ -1,0 +1,11 @@
+asset_id,asset_name,category,cost,useful_life_years,depreciation_method,purchase_date,annual_depreciation,monthly_depreciation,accum_dep_opening,net_book_value_open,is_fully_depreciated,status
+FA001,Leasehold Improvements – Level 5,Leasehold Improvements,450000,10,Straight-Line,2021-07-01,45000.0,3750.0,180000.0,270000.0,0,Active
+FA002,Leasehold Improvements – Level 6,Leasehold Improvements,320000,10,Straight-Line,2022-01-15,32000.0,2666.67,112000.14,207999.86,0,Active
+FA003,Server Infrastructure,IT Equipment,280000,5,Straight-Line,2022-03-01,56000.0,4666.67,186666.8,93333.2,0,Active
+FA004,Workstations & Laptops (Batch A),IT Equipment,95000,3,Straight-Line,2023-07-01,31666.67,2638.89,63333.36,31666.64,0,Active
+FA005,Workstations & Laptops (Batch B),IT Equipment,88000,3,Straight-Line,2024-07-01,29333.33,2444.44,29333.28,58666.72,0,Active
+FA006,AV & Conference Equipment,Furniture & Fittings,62000,7,Straight-Line,2022-09-01,8857.14,738.09,25095.06,36904.94,0,Active
+FA007,Office Furniture – Level 5,Furniture & Fittings,48000,10,Straight-Line,2021-07-01,4800.0,400.0,19200.0,28800.0,0,Active
+FA008,Office Furniture – Level 6,Furniture & Fittings,35000,10,Straight-Line,2022-01-15,3500.0,291.67,12250.14,22749.86,0,Active
+FA009,Learning Management System,Software,150000,5,Straight-Line,2023-01-01,30000.0,2500.0,75000.0,75000.0,0,Active
+FA010,Fleet Vehicle – Toyota HiLux,Motor Vehicles,55000,5,Straight-Line,2023-07-01,11000.0,916.67,22000.08,32999.92,0,Active

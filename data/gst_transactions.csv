@@ -1,0 +1,19 @@
+gst_id,period,transaction_date,description,transaction_type,amount_excl_gst,gst_amount,account_code
+GST08001,2025-07,2025-07-31,GST collected on taxable supplies,Output Tax,617533.56,61753.36,2200
+GST08002,2025-07,2025-07-31,Input tax credits on acquisitions,Input Tax Credit,169864.54,16986.45,1201
+GST08003,2025-08,2025-08-31,GST collected on taxable supplies,Output Tax,622767.62,62276.76,2200
+GST08004,2025-08,2025-08-31,Input tax credits on acquisitions,Input Tax Credit,184666.05,18466.6,1201
+GST08005,2025-09,2025-09-30,GST collected on taxable supplies,Output Tax,602726.65,60272.67,2200
+GST08006,2025-09,2025-09-30,Input tax credits on acquisitions,Input Tax Credit,166826.22,16682.62,1201
+GST08007,2025-10,2025-10-31,GST collected on taxable supplies,Output Tax,589218.75,58921.88,2200
+GST08008,2025-10,2025-10-31,Input tax credits on acquisitions,Input Tax Credit,176439.74,17643.97,1201
+GST08009,2025-11,2025-11-30,GST collected on taxable supplies,Output Tax,628780.02,62878.0,2200
+GST08010,2025-11,2025-11-30,Input tax credits on acquisitions,Input Tax Credit,161962.4,16196.24,1201
+GST08011,2025-12,2025-12-31,GST collected on taxable supplies,Output Tax,611632.8,61163.28,2200
+GST08012,2025-12,2025-12-31,Input tax credits on acquisitions,Input Tax Credit,189551.57,18955.16,1201
+GST08013,2026-01,2026-01-31,GST collected on taxable supplies,Output Tax,562688.58,56268.86,2200
+GST08014,2026-01,2026-01-31,Input tax credits on acquisitions,Input Tax Credit,173967.11,17396.71,1201
+GST08015,2026-02,2026-02-28,GST collected on taxable supplies,Output Tax,589884.39,58988.44,2200
+GST08016,2026-02,2026-02-28,Input tax credits on acquisitions,Input Tax Credit,191904.66,19190.47,1201
+GST08017,2026-03,2026-03-31,GST collected on taxable supplies,Output Tax,616551.19,61655.12,2200
+GST08018,2026-03,2026-03-31,Input tax credits on acquisitions,Input Tax Credit,199097.23,19909.72,1201
