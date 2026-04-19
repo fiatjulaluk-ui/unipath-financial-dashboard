@@ -857,7 +857,7 @@ if page == "Executive Overview":
     with col4:
         section(f"Cumulative Net Surplus – YTD to {selected_period}")
         monthly_sorted = monthly.sort_values("period")
-        monthly_sorted["Cumulative Net"] = monthly_sorted["Net"].cumsum()
+        monthly_sorted["Cumulative Net"] = monthly_sorted["NPAT"].cumsum()
         fig4 = px.area(monthly_sorted, x="period", y="Cumulative Net",
                        color_discrete_sequence=[RMIT_RED])
         fig4.update_traces(line_width=2.5)
