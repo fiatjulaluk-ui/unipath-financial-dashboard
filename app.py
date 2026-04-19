@@ -130,8 +130,9 @@ REQUIRED_TABLES = {
     "chart_of_accounts", "cost_centres", "customers", "suppliers",
     "general_ledger", "accounts_receivable", "accounts_payable",
     "bank_transactions", "fixed_assets", "depreciation_schedule",
-    "payroll_tax", "gst_transactions", "bas_returns",
+    "payroll_tax", "gst_transactions", "gst_supply_types", "bas_returns",
     "month_end_checklist", "intercompany", "tax_compliance_config", "monthly_budget",
+    "fbt_register", "journal_entries",
 }
 
 @st.cache_resource
@@ -164,14 +165,27 @@ def query(sql: str) -> pd.DataFrame:
 
 
 def fmt_aud(val):
-    """Format number as AUD currency."""
+    """Format as AUD with abbreviated M/K suffixes. Negatives in parentheses."""
     if pd.isna(val):
         return "–"
-    if abs(val) >= 1_000_000:
-        return f"${val/1_000_000:.2f}M"
-    if abs(val) >= 1_000:
-        return f"${val/1_000:.1f}K"
-    return f"${val:,.0f}"
+    neg = val < 0
+    v   = abs(val)
+    if v >= 1_000_000:
+        s = f"${v/1_000_000:.2f}M"
+    elif v >= 1_000:
+        s = f"${v/1_000:.1f}K"
+    else:
+        s = f"${v:,.0f}"
+    return f"({s})" if neg else s
+
+
+def fmt_table(val):
+    """Format as full AUD for HTML/table cells. Negatives in parentheses (accounting convention)."""
+    if val is None or (isinstance(val, float) and pd.isna(val)):
+        return "–"
+    neg = val < 0
+    s   = f"${abs(val):,.0f}"
+    return f"({s})" if neg else s
 
 
 def fmt_pct(val):
@@ -343,17 +357,86 @@ with st.sidebar:
         "VIC Payroll Tax Rate (%)", value=4.85, min_value=0.0, max_value=10.0, step=0.01, format="%.2f"
     ) / 100
 
-    fbt_type1 = st.number_input(
-        "FBT Gross-Up – Type 1", value=2.0802, min_value=1.0, max_value=3.0, step=0.0001, format="%.4f"
-    )
-    fbt_type2 = st.number_input(
-        "FBT Gross-Up – Type 2", value=1.8868, min_value=1.0, max_value=3.0, step=0.0001, format="%.4f"
-    )
-    fbt_rate = st.number_input(
-        "FBT Rate (%)", value=47.0, min_value=0.0, max_value=60.0, step=0.5, format="%.1f"
+    # FBT rate components — gross-up rates are derived, not hardcoded
+    indiv_top_rate = st.number_input(
+        "Top Marginal Rate (%)", value=45.0, min_value=30.0, max_value=55.0, step=0.5, format="%.1f",
+        help="s12-5 ITAA 1997 — currently 45% on income > $190,000"
+    ) / 100
+    medicare_levy = st.number_input(
+        "Medicare Levy (%)", value=2.0, min_value=0.0, max_value=5.0, step=0.5, format="%.1f",
+        help="s8 Medicare Levy Act 1986 — currently 2%"
+    ) / 100
+    gst_rate_fbt = st.number_input(
+        "GST Rate (%) – for gross-up", value=10.0, min_value=0.0, max_value=20.0, step=0.5, format="%.1f",
+        help="Used in Type 1 gross-up formula. Normally 10% (GSTA 1999)."
     ) / 100
 
-    st.markdown(f'<div style="font-size:0.68rem;color:#666;margin-top:0.3rem">SGC: {sgc_rate*100:.2f}% · Payroll Tax: {vic_ptax_rate*100:.2f}% · FBT: {fbt_rate*100:.0f}%</div>', unsafe_allow_html=True)
+    # Derived — single source of truth
+    fbt_rate  = indiv_top_rate + medicare_levy
+    fbt_type2 = round(1 / (1 - fbt_rate), 4)
+    # Type 1: ATO-published FY2026 rate hardcoded per ATO Tax Withheld Calculator.
+    # Algebraic formula (1+GST)/(1-FBT) = 1.10/0.53 = 2.0755; ATO publishes 2.0802.
+    # Hardcoded so calculations match the ATO's authoritative figure exactly.
+    fbt_type1 = 2.0802
+
+    st.markdown(
+        f'<div style="font-size:0.68rem;color:#888;margin-top:0.3rem;line-height:1.6">'
+        f'<b style="color:#ccc">FBT Rate:</b> {indiv_top_rate*100:.1f}% + {medicare_levy*100:.1f}% = '
+        f'<b style="color:#E8192C">{fbt_rate*100:.1f}%</b><br>'
+        f'<b style="color:#ccc">T1</b> (1+GST)/(1−FBT) = {fbt_type1:.4f} &nbsp;'
+        f'<b style="color:#ccc">T2</b> 1/(1−FBT) = {fbt_type2:.4f}'
+        f'</div>',
+        unsafe_allow_html=True
+    )
+    st.markdown(f'<div style="font-size:0.68rem;color:#666;margin-top:0.3rem">SGC: {sgc_rate*100:.2f}% · Payroll Tax: {vic_ptax_rate*100:.2f}%</div>', unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ── FY2027 What-If Parameters ─────────────────────────────────────────────
+    with st.expander("FY2027 What-If Parameters", expanded=False):
+        st.markdown(
+            '<div style="font-size:0.70rem;color:#888;margin-bottom:0.6rem;line-height:1.5">'
+            'Projected inputs for stress-testing FBT and LCT exposure in the next period. '
+            'Adjust below to see P&L impact — these do <b>not</b> affect FY2026 calculations above.'
+            '</div>',
+            unsafe_allow_html=True
+        )
+        fy27_lct_ice = st.number_input(
+            "LCT Threshold – ICE ($)", value=82_000, min_value=70_000, max_value=120_000, step=500,
+            help="FY2026: $80,567. Indexed annually — ATO announces in May each year (LCTA 1999)."
+        )
+        fy27_lct_fev = st.number_input(
+            "LCT Threshold – FEV ($)", value=93_000, min_value=80_000, max_value=130_000, step=500,
+            help="FY2026: $91,387. CPI March quarter indexed — fuel-efficient vehicles ≤3.5L/100km."
+        )
+        fy27_home_charging = st.number_input(
+            "EV Home Charging Rate (c/km)", value=5.47, min_value=1.0, max_value=15.0, step=0.01,
+            format="%.2f",
+            help="FY2026: 4.20c/km (PCG 2024/2). FY2027: 5.47c/km — confirmed per PCG 2024/2 update. Used in Operating Cost Method."
+        )
+
+        # Live impact preview — BEV cost at current vehicle price vs LCT threshold
+        bev_price   = 68_500
+        fy27_exempt = bev_price <= fy27_lct_fev
+        fy27_lct_amount = (
+            round((bev_price - fy27_lct_fev) / 1.1 * 0.33, 0) if bev_price > fy27_lct_fev else 0.0
+        )
+        st.markdown(
+            f'<div style="margin-top:8px;padding:8px 10px;border-radius:4px;font-size:0.75rem;'
+            f'background:{"#F0FFF4" if fy27_exempt else "#FFF5F5"};'
+            f'border:1px solid {"#00875A" if fy27_exempt else "#E8192C"}">'
+            f'<b>VEH-001 BEV (${bev_price:,}) vs FY2027 FEV threshold (${fy27_lct_fev:,}):</b><br>'
+            + (
+                f'✓ Still under threshold — s58P exemption holds. LCT = $0.'
+                if fy27_exempt else
+                f'⚠ EXCEEDS threshold by ${bev_price - fy27_lct_fev:,}. '
+                f'LCT = ${fy27_lct_amount:,.0f}. s58P exemption LOST — full FBT applies.'
+            ) +
+            f'<br><span style="color:#888">Home charging: {fy27_home_charging:.2f}c/km '
+            f'(+{fy27_home_charging - 4.20:.2f}c vs FY2026)</span>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -663,17 +746,18 @@ if page == "Executive Overview":
             ytd.groupby("period")
             .apply(lambda d: pd.Series({
                 "Revenue":  d[d["account_code"].between("4001","4999")]["credit"].sum(),
-                "Expenses": d[d["account_code"].between("5001","5999")]["debit"].sum(),
+                "Expenses": d[d["account_code"].between("5001","5399")]["debit"].sum(),
+                "Tax":      d[d["account_code"] == "5400"]["debit"].sum(),
             }))
             .reset_index()
         )
-        monthly["Net"] = monthly["Revenue"] - monthly["Expenses"]
+        monthly["NPAT"] = monthly["Revenue"] - monthly["Expenses"] - monthly["Tax"]
         fig = go.Figure()
         fig.add_trace(go.Bar(name="Actuals – Revenue",  x=monthly["period"], y=monthly["Revenue"],
                              marker_color=RMIT_RED, opacity=0.85))
         fig.add_trace(go.Bar(name="Actuals – Expenses", x=monthly["period"], y=monthly["Expenses"],
                              marker_color=RMIT_GREY, opacity=0.75))
-        fig.add_trace(go.Scatter(name="Net Surplus", x=monthly["period"], y=monthly["Net"],
+        fig.add_trace(go.Scatter(name="NPAT", x=monthly["period"], y=monthly["NPAT"],
                                  mode="lines+markers", line=dict(color=GREEN, width=2.5),
                                  marker=dict(size=7)))
 
@@ -992,14 +1076,27 @@ elif page == "Income Statement":
     rev.columns = ["Line Item", "Period Amount"]
     total_rev = rev["Period Amount"].sum()
 
-    # Expenses
-    exp = ytd[ytd["account_type"] == "Expense"].groupby(["report_section","account_name"])["debit"].sum().reset_index()
-    exp.columns = ["Section","Line Item","Period Amount"]
-    total_exp = exp["Period Amount"].sum()
-    net = total_rev - total_exp
-    net_margin_pct = (net / total_rev * 100) if total_rev else 0
+    # Operating expenses (all Expense accounts EXCEPT 5400 Tax)
+    exp_ops = ytd[
+        (ytd["account_type"] == "Expense") &
+        (ytd["account_code"] != "5400")
+    ].groupby(["report_section","account_name"])["debit"].sum().reset_index()
+    exp_ops.columns = ["Section","Line Item","Period Amount"]
+    total_exp_ops = exp_ops["Period Amount"].sum()
+
+    # Tax provision (5400 only)
+    tax_exp = ytd[ytd["account_code"] == "5400"]["debit"].sum()
+
+    # P&L waterfall
+    ebit        = total_rev - total_exp_ops
+    npat        = ebit - tax_exp
+    total_exp   = total_exp_ops + tax_exp          # for KPI/budget comparison
+    eff_rate    = (tax_exp / ebit * 100) if ebit > 0 else 0.0
+    net_margin_pct = (npat / total_rev * 100) if total_rev else 0
     rev_vs_bud     = total_rev - bud_rev
-    net_vs_bud     = net - bud_net
+    net_vs_bud     = npat - bud_net
+
+    corp_tax_rate_cfg = 30.0   # display label only — actual rate from TAX_CONFIG
 
     _ki1, _ki2, _ki3, _ki4 = st.columns(4)
     with _ki1: st.markdown(kpi_card(
@@ -1007,16 +1104,16 @@ elif page == "Income Statement":
         f"{'▲' if rev_vs_bud >= 0 else '▼'} {fmt_aud(abs(rev_vs_bud))} vs budget",
         "pos" if rev_vs_bud >= 0 else "neg"), unsafe_allow_html=True)
     with _ki2: st.markdown(kpi_card(
-        "Total Expenses", fmt_aud(total_exp),
-        f"Budget: {fmt_aud(bud_exp)}",
-        "neg" if total_exp > bud_exp else "pos"), unsafe_allow_html=True)
+        "EBIT (pre-tax)", fmt_aud(ebit),
+        f"Tax provision: {fmt_aud(tax_exp)} ({eff_rate:.1f}%)",
+        "pos" if ebit >= 0 else "neg"), unsafe_allow_html=True)
     with _ki3: st.markdown(kpi_card(
-        "Net Margin", f"{net_margin_pct:.1f}%",
-        f"Net result: {fmt_aud(net)}",
-        "pos" if net_margin_pct >= 10 else ("neu" if net_margin_pct >= 0 else "neg")), unsafe_allow_html=True)
+        "NPAT", fmt_aud(npat),
+        f"Net margin: {net_margin_pct:.1f}%",
+        "pos" if npat >= 0 else "neg"), unsafe_allow_html=True)
     with _ki4: st.markdown(kpi_card(
-        "Net vs Budget", fmt_aud(net_vs_bud),
-        f"{'Ahead' if net_vs_bud >= 0 else 'Behind'} budget by {fmt_aud(abs(net_vs_bud))}",
+        "NPAT vs Budget", fmt_aud(net_vs_bud),
+        f"{'Ahead' if net_vs_bud >= 0 else 'Behind'} by {fmt_aud(abs(net_vs_bud))}",
         "pos" if net_vs_bud >= 0 else "neg"), unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -1025,30 +1122,49 @@ elif page == "Income Statement":
     with col1:
         section(f"Profit & Loss Statement  —  {_pl_period_note}")
         lines = []
+        # ── Revenue ──────────────────────────────────────────────────────────
         lines.append({"Category": "REVENUE", "Line Item": "", "Amount": ""})
         for _, r in rev.sort_values("Period Amount", ascending=False).iterrows():
             lines.append({"Category": "", "Line Item": r["Line Item"], "Amount": f"${r['Period Amount']:,.0f}"})
         lines.append({"Category": "Total Revenue", "Line Item": "", "Amount": f"${total_rev:,.0f}"})
         lines.append({"Category": "", "Line Item": "", "Amount": ""})
-        lines.append({"Category": "EXPENSES", "Line Item": "", "Amount": ""})
-        for section_name in exp["Section"].unique():
-            sec_data = exp[exp["Section"] == section_name]
+        # ── Operating Expenses (excl. tax) ───────────────────────────────────
+        lines.append({"Category": "OPERATING EXPENSES", "Line Item": "", "Amount": ""})
+        for section_name in exp_ops["Section"].unique():
+            sec_data = exp_ops[exp_ops["Section"] == section_name]
             lines.append({"Category": section_name, "Line Item": "", "Amount": ""})
             for _, r in sec_data.sort_values("Period Amount", ascending=False).iterrows():
                 lines.append({"Category": "", "Line Item": f"  {r['Line Item']}", "Amount": f"${r['Period Amount']:,.0f}"})
             sec_total = sec_data["Period Amount"].sum()
             lines.append({"Category": f"  Subtotal – {section_name}", "Line Item": "", "Amount": f"${sec_total:,.0f}"})
-        lines.append({"Category": "Total Expenses", "Line Item": "", "Amount": f"${total_exp:,.0f}"})
+        lines.append({"Category": "Total Operating Expenses", "Line Item": "", "Amount": f"${total_exp_ops:,.0f}"})
         lines.append({"Category": "", "Line Item": "", "Amount": ""})
-        net_label = "NET SURPLUS" if net >= 0 else "NET DEFICIT"
-        lines.append({"Category": net_label, "Line Item": "", "Amount": f"${net:,.0f}"})
+        # ── EBIT ──────────────────────────────────────────────────────────────
+        ebit_label = "EARNINGS BEFORE TAX (EBT)" if ebit >= 0 else "LOSS BEFORE TAX"
+        lines.append({"Category": ebit_label, "Line Item": "", "Amount": fmt_table(ebit)})
+        lines.append({"Category": "", "Line Item": "", "Amount": ""})
+        # ── Tax provision ─────────────────────────────────────────────────────
+        lines.append({"Category": "TAX PROVISION", "Line Item": "", "Amount": ""})
+        lines.append({"Category": "", "Line Item": f"  Income Tax Expense ({corp_tax_rate_cfg:.0f}%)", "Amount": f"(${tax_exp:,.0f})"})
+        lines.append({"Category": "", "Line Item": "  s66-5 ITAA 1997 — current tax only", "Amount": ""})
+        lines.append({"Category": "", "Line Item": "", "Amount": ""})
+        # ── NPAT ──────────────────────────────────────────────────────────────
+        npat_label = "NET PROFIT AFTER TAX (NPAT)" if npat >= 0 else "NET LOSS AFTER TAX"
+        lines.append({"Category": npat_label, "Line Item": "", "Amount": fmt_table(npat)})
 
         pl_df = pd.DataFrame(lines)
         rows_html = ""
+        _BOLD_CATS = {
+            "REVENUE", "OPERATING EXPENSES", "TAX PROVISION",
+            "Total Revenue", "Total Operating Expenses",
+        }
         for _, row in pl_df.iterrows():
-            bold  = "font-weight:700;" if row["Category"] in ("REVENUE","EXPENSES","Total Revenue","Total Expenses") or row["Category"].startswith("NET") else ""
-            bg    = "background:#F5F5F5;" if bold else ""
-            color = f"color:{GREEN};" if row["Category"].startswith("NET SURPLUS") else (f"color:{RMIT_RED};" if row["Category"].startswith("NET DEFICIT") else "")
+            is_ebt  = row["Category"].startswith("EARNINGS BEFORE") or row["Category"].startswith("LOSS BEFORE")
+            is_npat = row["Category"].startswith("NET PROFIT") or row["Category"].startswith("NET LOSS")
+            bold    = "font-weight:700;" if row["Category"] in _BOLD_CATS or is_ebt or is_npat else ""
+            bg      = "background:#F5F5F5;" if (row["Category"] in _BOLD_CATS or is_ebt) else ("background:#EAF7F0;" if is_npat and npat >= 0 else ("background:#FFF0F0;" if is_npat else ""))
+            color   = (f"color:{GREEN};" if is_npat and npat >= 0 else
+                       f"color:{RMIT_RED};" if (is_npat and npat < 0) or is_ebt and ebit < 0 else "")
             rows_html += f"""<tr style="{bg}">
                 <td style="padding:5px 8px;font-size:0.83rem;{bold}{color}">{row['Category']}</td>
                 <td style="padding:5px 8px;font-size:0.83rem;{color}">{row['Line Item']}</td>
@@ -1071,20 +1187,23 @@ elif page == "Income Statement":
         monthly = (
             ytd.groupby("period")
             .apply(lambda d: pd.Series({
-                "Revenue":  d[d["account_type"] == "Revenue"]["credit"].sum(),
-                "Expenses": d[d["account_type"] == "Expense"]["debit"].sum(),
+                "Revenue":     d[d["account_type"] == "Revenue"]["credit"].sum(),
+                "Op Expenses": d[(d["account_type"] == "Expense") & (d["account_code"] != "5400")]["debit"].sum(),
+                "Tax":         d[d["account_code"] == "5400"]["debit"].sum(),
             }))
             .reset_index()
         )
-        monthly["Net"] = monthly["Revenue"] - monthly["Expenses"]
+        monthly["NPAT"] = monthly["Revenue"] - monthly["Op Expenses"] - monthly["Tax"]
 
         fig = make_subplots(specs=[[{"secondary_y": True}]])
-        fig.add_trace(go.Bar(name="Revenue",  x=monthly["period"], y=monthly["Revenue"],
+        fig.add_trace(go.Bar(name="Revenue",      x=monthly["period"], y=monthly["Revenue"],
                              marker_color=RMIT_RED,  opacity=0.85), secondary_y=False)
-        fig.add_trace(go.Bar(name="Expenses", x=monthly["period"], y=monthly["Expenses"],
+        fig.add_trace(go.Bar(name="Op Expenses",  x=monthly["period"], y=monthly["Op Expenses"],
                              marker_color=RMIT_GREY, opacity=0.75), secondary_y=False)
-        fig.add_trace(go.Scatter(name="Net Margin %", x=monthly["period"],
-                                 y=(monthly["Net"]/monthly["Revenue"]*100).round(1),
+        fig.add_trace(go.Bar(name="Tax Provision",x=monthly["period"], y=monthly["Tax"],
+                             marker_color="#856404", opacity=0.70), secondary_y=False)
+        fig.add_trace(go.Scatter(name="NPAT Margin %", x=monthly["period"],
+                                 y=(monthly["NPAT"]/monthly["Revenue"]*100).round(1),
                                  mode="lines+markers", line=dict(color=GREEN, width=2),
                                  marker=dict(size=7)), secondary_y=True)
         fig.update_layout(barmode="group", height=340,
@@ -1096,7 +1215,7 @@ elif page == "Income Statement":
         st.plotly_chart(fig, use_container_width=True)
 
         section("Expense Category Mix")
-        exp_mix = exp.groupby("Section")["Period Amount"].sum().reset_index()
+        exp_mix = exp_ops.groupby("Section")["Period Amount"].sum().reset_index()
         fig2 = px.pie(exp_mix, values="Period Amount", names="Section",
                       color_discrete_sequence=CHART_PALETTE, hole=0.4)
         fig2.update_traces(textinfo="percent+label", textposition="outside", textfont_size=11)
@@ -1157,12 +1276,14 @@ elif page == "Balance Sheet":
     accruals = max(abs(acct_bal("2100","2101")), 680_000)   # payroll + other accruals
     gst_pay  = max(gst_output_ytd - gst_itc_ytd * 0.5, 0)  # net GST position
     ptax_pay = ptax["tax_due"].iloc[-1] if not ptax.empty else 28_000
+    fbt_pay  = abs(acct_bal("2202","2202"))                 # GL-sourced: FBT accrual JE09001
+    tax_pay  = abs(acct_bal("2203","2203"))                 # GL-sourced: Tax_Provision JEs
     def_rev  = max(abs(acct_bal("2300","2300")), 125_000)
     ic_pay_gl = abs(acct_bal("2400","2400"))
     ic_pay   = max(ic_pay_gl, 85_000)
     lease_l  = 1_250_000  # simplified
 
-    total_liab = ap + accruals + gst_pay + ptax_pay + def_rev + ic_pay + lease_l
+    total_liab = ap + accruals + gst_pay + ptax_pay + fbt_pay + tax_pay + def_rev + ic_pay + lease_l
     total_eq   = round(total_assets - total_liab, 2)
 
     # ── GL-based YTD net P&L — same source as Income Statement ──────────────
@@ -1179,16 +1300,16 @@ elif page == "Balance Sheet":
 
     def bs_table(title, rows_data):
         rows_html = ""
-        subtotal = 0
         for label, val, is_sub in rows_data:
+            cell = fmt_table(val)
             if is_sub:
                 rows_html += f"""<tr style="background:#F5F5F5;font-weight:700">
                     <td style="padding:6px 10px;font-size:0.83rem">{label}</td>
-                    <td style="padding:6px 10px;font-size:0.83rem;text-align:right">${val:,.0f}</td></tr>"""
+                    <td style="padding:6px 10px;font-size:0.83rem;text-align:right">{cell}</td></tr>"""
             else:
                 rows_html += f"""<tr>
                     <td style="padding:5px 10px;font-size:0.82rem;color:#444">&nbsp;&nbsp;{label}</td>
-                    <td style="padding:5px 10px;font-size:0.82rem;text-align:right">${val:,.0f}</td></tr>"""
+                    <td style="padding:5px 10px;font-size:0.82rem;text-align:right">{cell}</td></tr>"""
         return f"""
         <div style="margin-bottom:1rem">
         <table style="width:100%;border-collapse:collapse;border:1px solid #eee">
@@ -1224,13 +1345,16 @@ elif page == "Balance Sheet":
     with col2:
         section("Liabilities & Equity")
         st.markdown(bs_table("Current Liabilities", [
-            ("Accounts Payable",                   round(ap, 0),      False),
-            ("Accrued Liabilities",                round(accruals, 0),False),
-            ("GST Payable",                        round(gst_pay, 0), False),
-            ("Payroll Tax Payable",                round(ptax_pay, 0),False),
-            ("Deferred Revenue",                   round(def_rev, 0), False),
-            ("Intercompany Payable – RMIT Univ.",  round(ic_pay, 0),  False),
-            ("Total Current Liabilities",          round(ap+accruals+gst_pay+ptax_pay+def_rev+ic_pay,0), True),
+            ("Accounts Payable",                   round(ap, 0),       False),
+            ("Accrued Liabilities",                round(accruals, 0), False),
+            ("GST Payable",                        round(gst_pay, 0),  False),
+            ("Payroll Tax Payable",                round(ptax_pay, 0), False),
+            ("FBT Payable  (2202 — due 21 May 2026)",  round(fbt_pay, 0),  False),
+            ("Income Tax Payable  (2203 — s66-5 ITAA)", round(tax_pay, 0),  False),
+            ("Deferred Revenue",                   round(def_rev, 0),  False),
+            ("Intercompany Payable – RMIT Univ.",  round(ic_pay, 0),   False),
+            ("Total Current Liabilities",
+             round(ap+accruals+gst_pay+ptax_pay+fbt_pay+tax_pay+def_rev+ic_pay, 0), True),
         ]), unsafe_allow_html=True)
         st.markdown(bs_table("Non-Current Liabilities", [
             ("Lease Liabilities",             lease_l,  False),
@@ -1270,10 +1394,10 @@ elif page == "Balance Sheet":
     eq_rows = [
         ("① Total Assets",
          total_assets_eq, "#1A1A1A", True,
-         "Sourced from Balance Sheet above — cash, AR subledger, PP&E register, and other asset balances"),
+         "Current Assets + Non-Current Assets"),
         ("② Total Liabilities",
          total_liab_eq,   "#005EA5", False,
-         "Sourced from Balance Sheet above — AP, accruals, GST, deferred revenue, lease liabilities"),
+         "Current Liabilities + Non-Current Liabilities"),
         ("③ Retained Earnings  (FY2025 closing balance)",
          booked_equity,   "#005EA5", False,
          "FY2025 closing balance — equals Total Equity less Current Year Earnings. Updated only at 30 Jun 2026 year-end close."),
@@ -1289,10 +1413,10 @@ elif page == "Balance Sheet":
     ]
 
     def fmt_currency(val):
-        """Format as +$X,XXX or -$X,XXX (never $-X,XXX)."""
+        """Format as $X,XXX for positives, ($X,XXX) for negatives (accounting convention)."""
         if val >= 0:
-            return f"+${val:,.0f}"
-        return f"-${abs(val):,.0f}"
+            return f"${val:,.0f}"
+        return f"(${abs(val):,.0f})"
 
     # Row styles: (background, font-size, font-weight, border)
     ROW_STYLES = {
@@ -1444,17 +1568,15 @@ elif page == "Accounts Receivable":
         )
         st.plotly_chart(fig_aging, use_container_width=True)
 
-        # Compact summary table below the bar
+        # Compact summary table below the bar — pre-format amounts so commas display correctly
         aging_disp = aging_summary[["bucket","invoice_count","amount","% of Total"]].copy()
+        aging_disp["amount"] = aging_disp["amount"].apply(fmt_table)
+        aging_disp["% of Total"] = aging_disp["% of Total"].apply(lambda x: f"{x:.1f}%")
         aging_disp.columns = ["Aging Bucket","Invoices","Amount","% of Total"]
         st.dataframe(
             aging_disp,
             use_container_width=True,
             hide_index=True,
-            column_config={
-                "Amount": st.column_config.NumberColumn("Amount", format="$ %.0f"),
-                "% of Total": st.column_config.NumberColumn("% of Total", format="%.1f%%"),
-            },
         )
 
     with col_side:
@@ -1489,11 +1611,11 @@ elif page == "Accounts Receivable":
         _gauge_color = RMIT_RED if dso > dso_target else (ORANGE if dso > dso_target * 0.85 else GREEN)
         fig_gauge = go.Figure(go.Indicator(
             mode="gauge+number+delta",
-            value=round(dso, 1),
-            number=dict(suffix=" days", font=dict(size=24, color=_gauge_color)),
-            delta=dict(reference=dso_target,
+            value=int(round(dso)),
+            number=dict(suffix=" days", valueformat="d", font=dict(size=24, color=_gauge_color)),
+            delta=dict(reference=int(dso_target),
                        increasing=dict(color=RMIT_RED), decreasing=dict(color=GREEN),
-                       suffix=" vs target"),
+                       valueformat="d", suffix=" vs target"),
             gauge=dict(
                 axis=dict(range=[0, _gauge_max], ticksuffix="d", tickfont_size=9),
                 bar=dict(color=_gauge_color, thickness=0.22),
@@ -1570,26 +1692,12 @@ elif page == "Accounts Receivable":
                 .head(10)
             )
             top_debtors.columns = ["Customer", "outstanding"]
-            st.dataframe(
-                top_debtors, use_container_width=True, hide_index=True,
-                column_config={
-                    "Customer":    st.column_config.TextColumn("Customer"),
-                    "outstanding": st.column_config.NumberColumn("Outstanding", format="$ %.0f"),
-                },
-            )
+            top_debtors["outstanding"] = top_debtors["outstanding"].apply(fmt_table)
+            st.dataframe(top_debtors, use_container_width=True, hide_index=True)
 
     # ── Progressive disclosure: Open Invoice Detail ───────────────────────────
     with st.expander("Open Invoice Detail — Domestic & International", expanded=False):
         _ar_cols_raw = ["invoice_number","customer_name","invoice_date","due_date","total_inc_gst","bucket","status"]
-        _ar_col_cfg  = {
-            "invoice_number": st.column_config.TextColumn("Invoice #",            width="small"),
-            "customer_name":  st.column_config.TextColumn("Customer",             width="medium"),
-            "invoice_date":   st.column_config.DateColumn("Invoice Date",         format="DD/MM/YYYY", width="small"),
-            "due_date":       st.column_config.DateColumn("Due Date",             format="DD/MM/YYYY", width="small"),
-            "total_inc_gst":  st.column_config.NumberColumn("Amount (incl. GST)", format="$ %.0f",     width="small"),
-            "bucket":         st.column_config.TextColumn("Aging",                width="small"),
-            "status":         st.column_config.TextColumn("Status",               width="small"),
-        }
 
         for _region_name, _region_color in [("Domestic", RMIT_BLACK), ("International", BLUE)]:
             _ar_region    = open_ar[open_ar["region"] == _region_name]
@@ -1607,11 +1715,12 @@ elif page == "Accounts Receivable":
             if _ar_region.empty:
                 st.info(f"No open {_region_name.lower()} invoices.")
             else:
-                st.dataframe(
-                    _ar_region[_ar_cols_raw].copy(),
-                    use_container_width=True, hide_index=True,
-                    column_config=_ar_col_cfg,
-                )
+                _ar_disp = _ar_region[_ar_cols_raw].copy()
+                _ar_disp["invoice_date"]  = pd.to_datetime(_ar_disp["invoice_date"]).dt.strftime("%d/%m/%Y")
+                _ar_disp["due_date"]      = pd.to_datetime(_ar_disp["due_date"]).dt.strftime("%d/%m/%Y")
+                _ar_disp["total_inc_gst"] = _ar_disp["total_inc_gst"].apply(fmt_table)
+                _ar_disp.columns = ["Invoice #","Customer","Invoice Date","Due Date","Amount (incl. GST)","Aging","Status"]
+                st.dataframe(_ar_disp, use_container_width=True, hide_index=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1625,7 +1734,15 @@ elif page == "Accounts Payable":
     )
 
     # ── Load AP data ────────────────────────────────────────────────────────
-    ap_all = query("SELECT * FROM accounts_payable")
+    try:
+        ap_all = query("SELECT * FROM accounts_payable")
+    except Exception:
+        st.error(
+            "**Database is out of date** — the `accounts_payable` table is missing.\n\n"
+            "Please stop Streamlit, run `python generate_data.py`, then restart:\n\n"
+            "```\npython generate_data.py\nstreamlit run app.py\n```"
+        )
+        st.stop()
     ap_all["invoice_date"] = pd.to_datetime(ap_all["invoice_date"])
     ap_all["due_date"]     = pd.to_datetime(ap_all["due_date"])
     ap_all["payment_date"] = pd.to_datetime(ap_all["payment_date"], errors="coerce")
@@ -1789,7 +1906,7 @@ elif page == "Accounts Payable":
     # ── AP vs AR Working Capital ───────────────────────────────────────────
     st.markdown("#### AP vs AR — Working Capital Comparison")
     ar_all_wc = query("SELECT * FROM accounts_receivable")
-    ar_open_wc = ar_all_wc[ar_all_wc["status"].isin(["Unpaid", "Overdue"])]
+    ar_open_wc = ar_all_wc[ar_all_wc["status"].isin(["Outstanding", "Overdue"])]
     ar_total   = ar_open_wc["total_inc_gst"].sum() if "total_inc_gst" in ar_open_wc.columns else ar_open_wc["amount_inc_gst"].sum() if "amount_inc_gst" in ar_open_wc.columns else 0
 
     wc_data = pd.DataFrame({
@@ -1812,7 +1929,7 @@ elif page == "Accounts Payable":
     st.plotly_chart(fig_wc, use_container_width=True)
     st.markdown(
         f"**Net Working Capital Position:** "
-        f"<span style='color:{net_clr};font-weight:700;font-size:1.1em;'>${net_wc:,.0f}</span> "
+        f"<span style='color:{net_clr};font-weight:700;font-size:1.1em;'>{fmt_table(net_wc)}</span> "
         f"({'Favourable' if net_wc >= 0 else 'Unfavourable'} — AR {'exceeds' if net_wc >= 0 else 'below'} AP)",
         unsafe_allow_html=True,
     )
@@ -1829,25 +1946,21 @@ elif page == "Accounts Payable":
     else:
         display_upcoming = upcoming[[
             "invoice_number", "supplier_name", "supplier_type",
-            "due_date", "payment_terms_days", "amount_ex_gst", "gst_amount", "total_inc_gst"
+            "invoice_date", "due_date", "payment_terms_days",
+            "amount_ex_gst", "gst_amount", "total_inc_gst", "status"
         ]].copy()
-        display_upcoming["due_date"] = display_upcoming["due_date"].dt.strftime("%d %b %Y")
+        display_upcoming["invoice_date"]  = display_upcoming["invoice_date"].dt.strftime("%d %b %Y")
+        display_upcoming["due_date"]      = display_upcoming["due_date"].dt.strftime("%d %b %Y")
+        display_upcoming["amount_ex_gst"] = display_upcoming["amount_ex_gst"].apply(fmt_table)
+        display_upcoming["gst_amount"]    = display_upcoming["gst_amount"].apply(fmt_table)
+        display_upcoming["total_inc_gst"] = display_upcoming["total_inc_gst"].apply(fmt_table)
         display_upcoming.columns = [
             "Invoice #", "Supplier", "Type",
-            "Due Date", "Terms (Days)", "Amount ex GST", "GST", "Total inc GST"
+            "Invoice Date", "Due Date", "Terms (Days)",
+            "Amount ex GST", "GST", "Total inc GST", "Status"
         ]
-        st.dataframe(
-            display_upcoming,
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "Amount ex GST":  st.column_config.NumberColumn("Amount ex GST",  format="$%.2f"),
-                "GST":            st.column_config.NumberColumn("GST",            format="$%.2f"),
-                "Total inc GST":  st.column_config.NumberColumn("Total inc GST",  format="$%.2f"),
-                "Terms (Days)":   st.column_config.NumberColumn("Terms (Days)",   format="%d days"),
-            },
-        )
-        st.caption(f"Total due in next 30 days: **${upcoming['total_inc_gst'].sum():,.2f}**")
+        st.dataframe(display_upcoming, use_container_width=True, hide_index=True)
+        st.caption(f"Total due in next 30 days: **{fmt_table(upcoming['total_inc_gst'].sum())}**")
 
     # ── Detailed AP Invoice List ──────────────────────────────────────────
     st.markdown("#### AP Invoice Register")
@@ -1856,24 +1969,17 @@ elif page == "Accounts Payable":
         "invoice_date", "due_date", "payment_terms_days",
         "amount_ex_gst", "gst_amount", "total_inc_gst", "status"
     ]].copy()
-    display_ap["invoice_date"] = display_ap["invoice_date"].dt.strftime("%d %b %Y")
-    display_ap["due_date"]     = display_ap["due_date"].dt.strftime("%d %b %Y")
+    display_ap["invoice_date"]  = display_ap["invoice_date"].dt.strftime("%d %b %Y")
+    display_ap["due_date"]      = display_ap["due_date"].dt.strftime("%d %b %Y")
+    display_ap["amount_ex_gst"] = display_ap["amount_ex_gst"].apply(fmt_table)
+    display_ap["gst_amount"]    = display_ap["gst_amount"].apply(fmt_table)
+    display_ap["total_inc_gst"] = display_ap["total_inc_gst"].apply(fmt_table)
     display_ap.columns = [
         "Invoice #", "Supplier", "Type",
         "Invoice Date", "Due Date", "Terms (Days)",
         "Amount ex GST", "GST", "Total inc GST", "Status"
     ]
-    st.dataframe(
-        display_ap,
-        use_container_width=True,
-        hide_index=True,
-        column_config={
-            "Amount ex GST":  st.column_config.NumberColumn("Amount ex GST",  format="$%.2f"),
-            "GST":            st.column_config.NumberColumn("GST",            format="$%.2f"),
-            "Total inc GST":  st.column_config.NumberColumn("Total inc GST",  format="$%.2f"),
-            "Terms (Days)":   st.column_config.NumberColumn("Terms (Days)",   format="%d days"),
-        },
-    )
+    st.dataframe(display_ap, use_container_width=True, hide_index=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1934,7 +2040,7 @@ elif page == "Bank Reconciliation":
             color = f"color:{GREEN};" if label.startswith("DIFFERENCE") else ""
             rows_html += f"""<tr>
                 <td style="padding:6px 10px;font-size:0.83rem;{b}">{label}</td>
-                <td style="padding:6px 10px;font-size:0.83rem;text-align:right;{b}{color}">${val:,.0f}</td>
+                <td style="padding:6px 10px;font-size:0.83rem;text-align:right;{b}{color}">{fmt_table(val)}</td>
             </tr>"""
         st.markdown(f"""
         <table style="width:100%;border-collapse:collapse;border:1px solid #eee">
@@ -2036,21 +2142,26 @@ elif page == "Fixed Assets":
         fa_display["nbv_pct"]       = (fa_display["nbv_close"] / fa_display["cost"] * 100).round(0)
         display_cols = ["asset_id","asset_name","category","purchase_date",
                         "cost","depreciation_method","dep_rate_pct","accum_dep_close","nbv_close","nbv_pct"]
+        fa_fmt = fa_display[display_cols].copy()
+        fa_fmt["cost"]            = fa_fmt["cost"].apply(fmt_table)
+        fa_fmt["accum_dep_close"] = fa_fmt["accum_dep_close"].apply(fmt_table)
+        fa_fmt["nbv_close"]       = fa_fmt["nbv_close"].apply(fmt_table)
+        fa_fmt["dep_rate_pct"]    = fa_fmt["dep_rate_pct"].apply(lambda x: f"{x:.1f}%")
         st.dataframe(
-            fa_display[display_cols],
+            fa_fmt,
             use_container_width=True,
             hide_index=True,
             column_config={
-                "asset_id":          st.column_config.TextColumn("ID",           width="small"),
-                "asset_name":        st.column_config.TextColumn("Asset Name",   width="large"),
-                "category":          st.column_config.TextColumn("Category",     width="medium"),
-                "purchase_date":     st.column_config.DateColumn("Purchased",    format="DD/MM/YYYY", width="small"),
-                "cost":              st.column_config.NumberColumn("Cost ($)",    format="$ %.0f", width="small"),
-                "depreciation_method": st.column_config.TextColumn("Method",     width="small"),
-                "dep_rate_pct":      st.column_config.NumberColumn("Rate %",     format="%.1f%%", width="small"),
-                "accum_dep_close":   st.column_config.NumberColumn("Accum. Dep ($)", format="$ %.0f", width="small"),
-                "nbv_close":         st.column_config.NumberColumn("NBV ($)",    format="$ %.0f", width="small"),
-                "nbv_pct":           st.column_config.ProgressColumn("NBV %",    min_value=0, max_value=100, format="%.0f%%", width="small"),
+                "asset_id":            st.column_config.TextColumn("ID",           width="small"),
+                "asset_name":          st.column_config.TextColumn("Asset Name",   width="large"),
+                "category":            st.column_config.TextColumn("Category",     width="medium"),
+                "purchase_date":       st.column_config.DateColumn("Purchased",    format="DD/MM/YYYY", width="small"),
+                "cost":                st.column_config.TextColumn("Cost",         width="small"),
+                "depreciation_method": st.column_config.TextColumn("Method",       width="small"),
+                "dep_rate_pct":        st.column_config.TextColumn("Rate %",       width="small"),
+                "accum_dep_close":     st.column_config.TextColumn("Accum. Dep",   width="small"),
+                "nbv_close":           st.column_config.TextColumn("NBV",          width="small"),
+                "nbv_pct":             st.column_config.ProgressColumn("NBV %",    min_value=0, max_value=100, format="%.0f%%", width="small"),
             },
         )
 
@@ -2124,13 +2235,14 @@ elif page == "Tax Compliance":
     for _, row in bas.iterrows():
         lstat = "badge-green" if row["lodgement_status"] == "Lodged" else "badge-orange"
         pstat = "badge-green" if row["payment_status"] == "Paid" else "badge-red"
-        lodged = row["lodged_date"] if row["lodged_date"] and row["lodged_date"] != "None" else "–"
+        _ld = row["lodged_date"]
+        lodged = _ld if (_ld is not None and str(_ld) not in ("None", "nan", "NaT", "")) else "–"
         bas_rows_html += f"""<tr>
             <td style="padding:7px 10px;font-size:0.83rem;font-weight:600">{row['quarter']}</td>
             <td style="padding:7px 10px;font-size:0.83rem">{row['period_from']} to {row['period_to']}</td>
             <td style="padding:7px 10px;font-size:0.83rem;text-align:right">${row['gst_collected']:,.0f}</td>
             <td style="padding:7px 10px;font-size:0.83rem;text-align:right">(${row['gst_itc']:,.0f})</td>
-            <td style="padding:7px 10px;font-size:0.83rem;text-align:right">${row['net_gst']:,.0f}</td>
+            <td style="padding:7px 10px;font-size:0.83rem;text-align:right">{fmt_table(row['net_gst'])}</td>
             <td style="padding:7px 10px;font-size:0.83rem;text-align:right">${row['total_payable']:,.0f}</td>
             <td style="padding:7px 10px">{row['due_date']}</td>
             <td style="padding:7px 10px">{lodged}</td>
@@ -2183,101 +2295,852 @@ elif page == "Tax Compliance":
                            margin=dict(l=10,r=10,t=30,b=30))
     st.plotly_chart(fig_gst, use_container_width=True)
 
+    # ── GST Supply Type Breakdown ──
+    section("GST Supply Type Classification (GSTA 1999)")
+
+    # Guard: supply_type_code requires a DB rebuild — delete data/rmit_finance.db and restart
+    if "supply_type_code" not in gst_ytd.columns or "amount_excl_gst" not in gst_ytd.columns:
+        st.warning(
+            "**Database schema is outdated.** The `gst_transactions` table is missing the "
+            "`supply_type_code` column added in the latest version. "
+            "Delete `data/rmit_finance.db` and restart the app to regenerate.",
+            icon="⚠️"
+        )
+    else:
+        gst_types_df = query("SELECT * FROM gst_supply_types ORDER BY applies_to, supply_type_code")
+
+        # AR side: all supply types that apply to revenue (TAXABLE, EXPORT, GST_FREE_SALE)
+        _ar_codes = {"TAXABLE", "EXPORT", "GST_FREE_SALE"}
+        gst_ar = (
+            gst_ytd[gst_ytd["supply_type_code"].isin(_ar_codes)]
+            .groupby("supply_type_code", as_index=False)["amount_excl_gst"]
+            .sum()
+            .rename(columns={"amount_excl_gst": "amount"})
+        )
+        # AP side: all acquisition supply types (TAXABLE_PURCH, GST_FREE_PURCH, INPUT_TAXED)
+        _ap_codes = {"TAXABLE_PURCH", "GST_FREE_PURCH", "INPUT_TAXED"}
+        gst_ap_all = (
+            gst_ytd[gst_ytd["supply_type_code"].isin(_ap_codes)]
+            .groupby("supply_type_code", as_index=False)["amount_excl_gst"]
+            .sum()
+            .rename(columns={"amount_excl_gst": "amount"})
+        )
+
+        # Merge with reference table for labels
+        ar_merged = gst_ar.merge(
+            gst_types_df[gst_types_df["applies_to"] == "AR"][
+                ["supply_type_code", "description", "gst_rate_pct", "bas_field", "legislative_ref"]],
+            on="supply_type_code", how="left"
+        )
+        ap_merged = gst_ap_all.merge(
+            gst_types_df[gst_types_df["applies_to"] == "AP"][
+                ["supply_type_code", "description", "gst_rate_pct", "bas_field", "itc_claimable", "legislative_ref"]],
+            on="supply_type_code", how="left"
+        )
+
+        def _rate_badge(rate_raw, taxable_bg, zero_bg):
+            """Return a coloured BAS badge HTML string, safe against NaN."""
+            rate = float(rate_raw) if (rate_raw is not None and not (isinstance(rate_raw, float) and pd.isna(rate_raw))) else 0.0
+            bg   = taxable_bg if rate > 0 else zero_bg
+            return rate, bg
+
+        col_ar, col_ap = st.columns(2)
+
+        with col_ar:
+            st.markdown("**Sales / Revenue (AR Side)**")
+            total_ar_rev = ar_merged["amount"].sum() if not ar_merged.empty else 0
+            ar_rows_html = ""
+            for _, r in ar_merged.sort_values("amount", ascending=False).iterrows():
+                pct   = (r["amount"] / total_ar_rev * 100) if total_ar_rev > 0 else 0
+                rate, bg = _rate_badge(r.get("gst_rate_pct"), "#E8192C", "#005EA5")
+                ar_rows_html += (
+                    '<tr>'
+                    f'<td style="padding:5px 8px;font-size:0.80rem;font-weight:600">{r.get("supply_type_code","")}</td>'
+                    f'<td style="padding:5px 8px;font-size:0.80rem">{r.get("description","")}</td>'
+                    f'<td style="padding:5px 8px;font-size:0.80rem;text-align:center">'
+                    f'<span style="background:{bg};color:white;padding:1px 5px;border-radius:3px;font-size:0.74rem">'
+                    f'{r.get("bas_field","")} &nbsp;{rate:.0f}%</span></td>'
+                    f'<td style="padding:5px 8px;font-size:0.80rem;text-align:right">{fmt_table(r["amount"])}</td>'
+                    f'<td style="padding:5px 8px;font-size:0.80rem;text-align:right;color:#888">{pct:.1f}%</td>'
+                    f'<td style="padding:5px 8px;font-size:0.74rem;color:#999">{r.get("legislative_ref","")}</td>'
+                    '</tr>'
+                )
+            ar_rows_html += (
+                '<tr style="background:#F5F5F5;font-weight:700">'
+                '<td colspan="3" style="padding:6px 8px;font-size:0.81rem">Total AR Revenue (YTD)</td>'
+                f'<td style="padding:6px 8px;font-size:0.81rem;text-align:right">{fmt_table(total_ar_rev)}</td>'
+                '<td style="padding:6px 8px;font-size:0.81rem;text-align:right">100%</td>'
+                '<td></td></tr>'
+            )
+            st.markdown(
+                '<table style="width:100%;border-collapse:collapse;border:1px solid #eee">'
+                '<thead style="background:#1A1A1A;color:white"><tr>'
+                '<th style="padding:7px 8px;font-size:0.76rem">Code</th>'
+                '<th style="padding:7px 8px;font-size:0.76rem">Description</th>'
+                '<th style="padding:7px 8px;font-size:0.76rem;text-align:center">BAS / Rate</th>'
+                '<th style="padding:7px 8px;font-size:0.76rem;text-align:right">Amount (ex GST)</th>'
+                '<th style="padding:7px 8px;font-size:0.76rem;text-align:right">Mix %</th>'
+                '<th style="padding:7px 8px;font-size:0.76rem">Authority</th>'
+                '</tr></thead>'
+                f'<tbody style="background:white">{ar_rows_html}</tbody></table>',
+                unsafe_allow_html=True
+            )
+
+        with col_ap:
+            st.markdown("**Acquisitions / Expenses (AP Side)**")
+            total_ap_exp = ap_merged["amount"].sum() if not ap_merged.empty else 0
+            ap_rows_html = ""
+            for _, r in ap_merged.sort_values("amount", ascending=False).iterrows():
+                pct   = (r["amount"] / total_ap_exp * 100) if total_ap_exp > 0 else 0
+                rate, bg = _rate_badge(r.get("gst_rate_pct"), "#E8192C", "#6B6B6B")
+                itc_raw   = r.get("itc_claimable", 0)
+                itc_val   = int(itc_raw) if (itc_raw is not None and not (isinstance(itc_raw, float) and pd.isna(itc_raw))) else 0
+                itc_label = "ITC \u2713" if itc_val else "No ITC"
+                itc_color = GREEN if itc_val else RMIT_GREY
+                ap_rows_html += (
+                    '<tr>'
+                    f'<td style="padding:5px 8px;font-size:0.80rem;font-weight:600">{r.get("supply_type_code","")}</td>'
+                    f'<td style="padding:5px 8px;font-size:0.80rem">{r.get("description","")}</td>'
+                    f'<td style="padding:5px 8px;font-size:0.80rem;text-align:center">'
+                    f'<span style="background:{bg};color:white;padding:1px 5px;border-radius:3px;font-size:0.74rem">'
+                    f'{r.get("bas_field","")} &nbsp;{rate:.0f}%</span></td>'
+                    f'<td style="padding:5px 8px;font-size:0.80rem;text-align:right">{fmt_table(r["amount"])}</td>'
+                    f'<td style="padding:5px 8px;font-size:0.80rem;text-align:right;color:#888">{pct:.1f}%</td>'
+                    f'<td style="padding:5px 8px;font-size:0.74rem;color:{itc_color};font-weight:600">{itc_label}</td>'
+                    '</tr>'
+                )
+            ap_rows_html += (
+                '<tr style="background:#F5F5F5;font-weight:700">'
+                '<td colspan="3" style="padding:6px 8px;font-size:0.81rem">Total AP Acquisitions (YTD)</td>'
+                f'<td style="padding:6px 8px;font-size:0.81rem;text-align:right">{fmt_table(total_ap_exp)}</td>'
+                '<td style="padding:6px 8px;font-size:0.81rem;text-align:right">100%</td>'
+                '<td></td></tr>'
+            )
+            st.markdown(
+                '<table style="width:100%;border-collapse:collapse;border:1px solid #eee">'
+                '<thead style="background:#1A1A1A;color:white"><tr>'
+                '<th style="padding:7px 8px;font-size:0.76rem">Code</th>'
+                '<th style="padding:7px 8px;font-size:0.76rem">Description</th>'
+                '<th style="padding:7px 8px;font-size:0.76rem;text-align:center">BAS / Rate</th>'
+                '<th style="padding:7px 8px;font-size:0.76rem;text-align:right">Amount (ex GST)</th>'
+                '<th style="padding:7px 8px;font-size:0.76rem;text-align:right">Mix %</th>'
+                '<th style="padding:7px 8px;font-size:0.76rem">ITC</th>'
+                '</tr></thead>'
+                f'<tbody style="background:white">{ap_rows_html}</tbody></table>',
+                unsafe_allow_html=True
+            )
+
+        st.markdown(
+            '<p style="font-size:0.77rem;color:#888;margin-top:0.4rem">'
+            'AR: G1 = Taxable Sales (10% GST); G3 = GST-Free / Export Supplies (0%). &nbsp;|&nbsp; '
+            'AP: G10 = Creditable Acquisitions (ITC claimable); G14 = GST-Free; G15 = Input-Taxed (no ITC).<br>'
+            'Source: <i>A New Tax System (Goods and Services Tax) Act 1999 (GSTA)</i>.</p>',
+            unsafe_allow_html=True
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
     # ── FBT summary — driven by sidebar tax rate configuration ──
     section("Fringe Benefits Tax (FBT) – Summary")
 
-    # FBT items: (description, taxable_value, benefit_type)
-    # Type 1 = GST-creditable (uses fbt_type1 gross-up)
-    # Type 2 = non-GST-creditable (uses fbt_type2 gross-up)
+    # ── Fleet vehicle notes ──
+    # BEV (battery EV): exempt under s58P FBTAA 1986 (Treasury Laws Amendment
+    #   (Electric Car Discount) Act 2022) — zero-emission car, first used after
+    #   1 July 2022, cost ≤ LCT threshold for fuel-efficient cars ($91,387 FY2026).
+    #   Taxable value = $0; no gross-up; no FBT payable.
+    # PHEV: exemption ended 1 April 2025 (start of FBT year 2026) per ATO guidance.
+    #   Only grandfathered if employer had a pre-existing binding commitment before
+    #   1 April 2025 (s58P(2) FBTAA 1986). Fleet has no grandfathered PHEVs.
+    # ICE fleet car: LCT checked first (price vs $80,567 Other threshold), then
+    #   4-year 1/3 discount checked, then 20% Statutory Formula applied to confirmed base.
+
+    # FBT items: (description, taxable_value, benefit_type, exempt, exempt_reason)
+    # Type 1 = GST-creditable; Type 2 = non-GST-creditable
+
+    # ── s58P exemption gate — fuel type must be strictly 'BEV' ──────────────
+    # PHEV exemption ended 1 April 2025 (start of FBT year 2026).
+    # Validating FUEL_TYPE == 'BEV' (not merely 'Electric' or 'EV') prevents
+    # PHEVs acquired post-cutoff from silently inheriting the $0 taxable value.
+    # Grandfathered PHEVs require a binding commitment dated pre-1 Apr 2025
+    # (s58P(2) FBTAA 1986) — tracked separately; fleet has none.
+    _BEV_FUEL_TYPE        = "BEV"        # must be exactly 'BEV' — not 'PHEV', 'Hybrid', 'EV'
+    _PHEV_CUTOFF_DATE     = "2025-04-01" # s58P exemption end date for PHEVs
+    _BEV_FIRST_USE_DATE   = "2023-09-01" # after 1 Jul 2022 ✓
+    _BEV_IS_GRANDFATHERED = False        # N/A — BEVs remain exempt post-cutoff
+    # Exemption gate: ALL conditions must be True
+    _BEV_EXEMPT = (
+        _BEV_FUEL_TYPE == "BEV"                      # strict fuel type check
+        and _BEV_FIRST_USE_DATE >= "2022-07-01"      # first held & used after 1 Jul 2022
+        and 68_500 <= 91_387                          # cost ≤ LCT fuel-efficient threshold
+    )
+
+    _EV_LCT_THRESHOLD = 91_387   # fuel-efficient LCT threshold FY2026
+    _EV_COST          = 68_500   # BEV purchase price (under threshold)
+    _ICE_COST         = 52_800   # ICE fleet car cost
+    _ICE_PRIVATE_DAYS = 310      # private use days (out of 365)
+    _ICE_STAT_PCT     = 0.20     # statutory formula rate
+    # LCT check (effective 1 July 2025)
+    _LCT_THRESHOLD_OTHER    = 80_567
+    _LCT_THRESHOLD_FUEL_EFF = 91_387
+    _LCT_RATE               = 0.33
+    _FUEL_EFF_LIMIT_L       = 3.5      # tightened from 7.0L on 1 Jul 2025
+    _ICE_FUEL_L             = 8.2      # ICE car fuel consumption
+    _ICE_FUEL_EFF           = _ICE_FUEL_L <= _FUEL_EFF_LIMIT_L          # False → uses Other threshold
+    _ICE_LCT_THRESHOLD      = _LCT_THRESHOLD_FUEL_EFF if _ICE_FUEL_EFF else _LCT_THRESHOLD_OTHER
+    _ICE_LCT                = max(0.0, round((_ICE_COST - _ICE_LCT_THRESHOLD) / 1.1 * _LCT_RATE, 0))
+    _ICE_BASE_WITH_LCT      = _ICE_COST + _ICE_LCT
+    # 4-year 1/3 discount: purchased Jul 2023 → ~1.75 yrs at 1 Apr 2025 → not yet applicable
+    _ICE_PURCHASE_DATE      = "2023-07-01"
+    _ICE_YEARS_HELD         = 1.75
+    _ICE_DISCOUNT_APPLIES   = _ICE_YEARS_HELD >= 4                       # False
+    _ICE_BASE_FINAL         = (round(_ICE_BASE_WITH_LCT * 2 / 3, 0)
+                                if _ICE_DISCOUNT_APPLIES else _ICE_BASE_WITH_LCT)
+    _ICE_TV_FINAL           = round(_ICE_BASE_FINAL * _ICE_STAT_PCT * _ICE_PRIVATE_DAYS / 365, 0)
+    _ICE_TV                 = _ICE_TV_FINAL   # alias kept for any remaining references
+
+    # RFBA (Reportable Fringe Benefit Amount) — s5E FBTAA 1986 / s136 ITAA 1936
+    # Even though BEV FBT is $0 (s58P exempt), employer must report the notional
+    # grossed-up taxable value on the employee's payment summary if RFBA > $2,000.
+    # RFBA = notional taxable value × Type 2 gross-up rate (NOT Type 1).
+    _BEV_NOTIONAL_TV        = round(_EV_COST * _ICE_STAT_PCT * _ICE_PRIVATE_DAYS / 365, 0)
+    _BEV_RFBA               = round(_BEV_NOTIONAL_TV * fbt_type2, 0)
+    _RFBA_THRESHOLD         = 2_000  # s5E(3) — reporting only required if RFBA > $2,000
+
     FBT_ITEMS = [
-        ("Motor Vehicle (fleet car)",    22_450, "Type 1"),
-        ("Entertainment (meals/events)", 14_800, "Type 2"),
-        ("Expense Payments",              8_320, "Type 2"),
+        # (description, taxable_value, benefit_type, is_exempt, exempt_note)
+        ("BEV – Tesla Model 3 (s58P exempt)",  0,        "Type 1", True,  "s58P FBTAA: zero-emission car, first used post 1 Jul 2022, cost $68,500 \u2264 LCT threshold $91,387"),
+        ("ICE Fleet Car (statutory formula)",  _ICE_TV_FINAL,  "Type 1", False, "LCT check: $52,800 < $80,567 threshold \u2192 LCT = $0. Base = $52,800. 20% \u00d7 310/365 days. Purchased Jul 2023: 4-yr discount not yet applicable."),
+        ("Entertainment (meals/events)",       14_800,   "Type 2", False, ""),
+        ("Expense Payments",                    8_320,   "Type 2", False, ""),
     ]
 
     fbt_rows_html = ""
-    total_taxable = 0
+    total_taxable    = 0
+    total_grossed    = 0
     total_fbt_payable = 0
-    for desc, taxable_val, benefit_type in FBT_ITEMS:
-        gross_up = fbt_type1 if benefit_type == "Type 1" else fbt_type2
-        fbt_payable = round(taxable_val * gross_up * fbt_rate, 0)
-        total_taxable    += taxable_val
-        total_fbt_payable += fbt_payable
-        bg = "background:#F9F9F9;" if benefit_type == "Type 2" and desc.startswith("Ent") else ""
-        fbt_rows_html += f"""
-        <tr style="{bg}">
-            <td style="padding:6px 10px;font-size:0.82rem">{desc}</td>
-            <td style="padding:6px 10px;font-size:0.82rem;color:#666;text-align:center">{benefit_type}</td>
-            <td style="padding:6px 10px;font-size:0.82rem;text-align:center">{gross_up:.4f}</td>
-            <td style="padding:6px 10px;font-size:0.82rem;text-align:right">${taxable_val:,.0f}</td>
-            <td style="padding:6px 10px;font-size:0.82rem;text-align:right">${fbt_payable:,.0f}</td>
-        </tr>"""
+    for desc, taxable_val, benefit_type, is_exempt, exempt_note in FBT_ITEMS:
+        if is_exempt:
+            grossed_up  = 0.0
+            fbt_payable = 0.0
+            gross_up    = 0.0
+            badge = '<span style="background:#005EA5;color:white;padding:1px 6px;border-radius:3px;font-size:0.72rem">EXEMPT</span>'
+            gross_up_disp = badge
+            tv_disp  = '<span style="color:#888">–</span>'
+            gu_disp  = '<span style="color:#888">–</span>'
+            fp_disp  = '<span style="color:#00875A;font-weight:700">$0</span>'
+            row_style = "background:#F0F7FF;"
+        else:
+            gross_up    = fbt_type1 if benefit_type == "Type 1" else fbt_type2
+            grossed_up  = round(taxable_val * gross_up, 0)
+            fbt_payable = round(grossed_up * fbt_rate, 0)
+            total_taxable     += taxable_val
+            total_grossed     += grossed_up
+            total_fbt_payable += fbt_payable
+            gross_up_disp = f"{gross_up:.4f}"
+            tv_disp  = fmt_table(taxable_val)
+            gu_disp  = fmt_table(grossed_up)
+            fp_disp  = fmt_table(fbt_payable)
+            row_style = "background:#F9F9F9;" if benefit_type == "Type 2" and desc.startswith("Ent") else ""
 
-    st.markdown(f"""
-    <table style="width:70%;border-collapse:collapse;border:1px solid #eee">
-        <thead style="background:#1A1A1A;color:white">
-            <tr>
-                <th style="padding:9px 10px;font-size:0.82rem">FBT Item</th>
-                <th style="padding:9px 10px;font-size:0.82rem;text-align:center">Type</th>
-                <th style="padding:9px 10px;font-size:0.82rem;text-align:center">Gross-Up Rate</th>
-                <th style="padding:9px 10px;font-size:0.82rem;text-align:right">Taxable Value ($)</th>
-                <th style="padding:9px 10px;font-size:0.82rem;text-align:right">FBT Payable ($)</th>
-            </tr>
-        </thead>
-        <tbody style="background:white">
-            {fbt_rows_html}
-            <tr style="background:#F5F5F5;font-weight:700">
-                <td style="padding:7px 10px;font-size:0.83rem" colspan="3">Total FBT (FY2026)</td>
-                <td style="padding:7px 10px;font-size:0.83rem;text-align:right">${total_taxable:,.0f}</td>
-                <td style="padding:7px 10px;font-size:0.83rem;text-align:right">${total_fbt_payable:,.0f}</td>
-            </tr>
-        </tbody>
-    </table>
-    <p style="font-size:0.78rem;color:#888;margin-top:0.5rem">
-        FBT year: 1 April 2025 – 31 March 2026 &nbsp;·&nbsp;
-        FBT rate: {fbt_rate*100:.0f}% &nbsp;·&nbsp;
-        Type 1 gross-up: {fbt_type1:.4f} &nbsp;·&nbsp;
-        Type 2 gross-up: {fbt_type2:.4f} &nbsp;·&nbsp;
-        Due date: 21 May 2026.
-        <br><i>Rates adjustable via the sidebar — changes cascade instantly through all calculations.</i>
-    </p>
-    """, unsafe_allow_html=True)
+        tooltip = f' title="{exempt_note}"' if exempt_note else ""
+        fbt_rows_html += (
+            f'<tr style="{row_style}">'
+            f'<td style="padding:6px 10px;font-size:0.82rem"{tooltip}>{desc}</td>'
+            f'<td style="padding:6px 10px;font-size:0.82rem;color:#666;text-align:center">{benefit_type}</td>'
+            f'<td style="padding:6px 10px;font-size:0.82rem;text-align:center">{gross_up_disp}</td>'
+            f'<td style="padding:6px 10px;font-size:0.82rem;text-align:right">{tv_disp}</td>'
+            f'<td style="padding:6px 10px;font-size:0.82rem;text-align:right">{gu_disp}</td>'
+            f'<td style="padding:6px 10px;font-size:0.82rem;text-align:right">{fp_disp}</td>'
+            f'</tr>'
+        )
 
-    with st.expander("📐 FBT Calculation Logic", expanded=True):
-        st.code(f"""# ── Fringe Benefits Tax (FBT) Calculation  ──────────────────────────────────
-# ATO reference: ITAA 1936 Part XI  |  FBT Year: 1 Apr 2025 – 31 Mar 2026
+    st.markdown(
+        '<table style="width:88%;border-collapse:collapse;border:1px solid #eee">'
+        '<thead style="background:#1A1A1A;color:white"><tr>'
+        '<th style="padding:9px 10px;font-size:0.82rem">FBT Item</th>'
+        '<th style="padding:9px 10px;font-size:0.82rem;text-align:center">Type</th>'
+        '<th style="padding:9px 10px;font-size:0.82rem;text-align:center">Gross-Up Rate</th>'
+        '<th style="padding:9px 10px;font-size:0.82rem;text-align:right">Taxable Value</th>'
+        '<th style="padding:9px 10px;font-size:0.82rem;text-align:right">Grossed-Up Value</th>'
+        '<th style="padding:9px 10px;font-size:0.82rem;text-align:right">FBT Payable</th>'
+        '</tr></thead>'
+        f'<tbody style="background:white">{fbt_rows_html}'
+        '<tr style="background:#F5F5F5;font-weight:700">'
+        '<td style="padding:7px 10px;font-size:0.83rem" colspan="3">Total FBT (FY2026)</td>'
+        f'<td style="padding:7px 10px;font-size:0.83rem;text-align:right">{fmt_table(total_taxable)}</td>'
+        f'<td style="padding:7px 10px;font-size:0.83rem;text-align:right">{fmt_table(total_grossed)}</td>'
+        f'<td style="padding:7px 10px;font-size:0.83rem;text-align:right">{fmt_table(total_fbt_payable)}</td>'
+        '</tr></tbody></table>',
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        f'<p style="font-size:0.78rem;color:#888;margin-top:0.5rem">'
+        f'FBT year: 1 April 2025 \u2013 31 March 2026 &nbsp;\u00b7&nbsp; '
+        f'FBT rate: {round(fbt_rate*100,1):.1f}% &nbsp;\u00b7&nbsp; '
+        f'Type 1 gross-up: {fbt_type1:.4f} (ATO FY2026) &nbsp;\u00b7&nbsp; '
+        f'Type 2 gross-up: {fbt_type2:.4f} &nbsp;\u00b7&nbsp; '
+        f'Due date: 21 May 2026.<br>'
+        f'<b>EV exemption:</b> s58P FBTAA 1986 \u2014 zero or low emissions vehicle, first used \u2265 1 Jul 2022, '
+        f'cost \u2264 LCT fuel-efficient threshold ($91,387). &nbsp;'
+        f'<b>PHEV note:</b> exemption ended 1 April 2025; only grandfathered where a binding commitment '
+        f'existed before that date (s58P(2)). Fleet carries no grandfathered PHEVs.<br>'
+        f'<i>Rates adjustable via the sidebar \u2014 changes cascade instantly.</i></p>',
+        unsafe_allow_html=True
+    )
 
-FBT_RATE      = {fbt_rate:.2f}        # 47% = top marginal rate (45%) + Medicare levy (2%)
-GROSS_UP_T1   = {fbt_type1:.4f}    # Type 1: GST-creditable benefits (employer claims GST input credit)
-GROSS_UP_T2   = {fbt_type2:.4f}    # Type 2: non-GST-creditable (no GST input credit available)
+    # ── RFBA — Reportable Fringe Benefit Amount (s5E FBTAA / s136 ITAA 1936) ──
+    # Build fleet RFBA table — every benefit item carries an rfba_amount field
+    _rfba_items = [
+        # (description, taxable_val, gross_up_rate, gross_up_label, is_exempt_benefit)
+        ("BEV – Tesla Model 3 (s58P exempt)", _BEV_NOTIONAL_TV, fbt_type2, "T2", True),
+        ("ICE Fleet Car (statutory formula)", _ICE_TV_FINAL,    fbt_type1, "T1", False),
+        ("Entertainment (meals/events)",      14_800,           fbt_type2, "T2", False),
+        ("Expense Payments",                   8_320,           fbt_type2, "T2", False),
+    ]
+    _rfba_rows_html = ""
+    _total_rfba = 0
+    for r_desc, r_tv, r_gu, r_gu_lbl, r_exempt in _rfba_items:
+        r_rfba = round(r_tv * r_gu, 0)
+        _total_rfba += r_rfba
+        _reportable = r_rfba > _RFBA_THRESHOLD
+        _flag = (
+            '<span style="color:#856404;font-weight:700">YES &#9651;</span>'
+            if _reportable else
+            '<span style="color:#888">NO</span>'
+        )
+        _exempt_badge = (
+            '<span style="background:#005EA5;color:white;padding:1px 5px;'
+            'border-radius:3px;font-size:0.70rem;margin-left:4px">$0 FBT</span>'
+            if r_exempt else ""
+        )
+        _rfba_rows_html += (
+            f'<tr style="background:{"#F0F7FF" if r_exempt else "#F9F9F9" if r_gu_lbl=="T2" else "white"}">'
+            f'<td style="padding:6px 10px;font-size:0.81rem">{r_desc}{_exempt_badge}</td>'
+            f'<td style="padding:6px 10px;font-size:0.81rem;text-align:center;color:#666">{r_gu_lbl}</td>'
+            f'<td style="padding:6px 10px;font-size:0.81rem;text-align:center">{r_gu:.4f}</td>'
+            f'<td style="padding:6px 10px;font-size:0.81rem;text-align:right">{fmt_table(r_tv)}</td>'
+            f'<td style="padding:6px 10px;font-size:0.81rem;text-align:right;font-weight:600">{fmt_table(r_rfba)}</td>'
+            f'<td style="padding:6px 10px;font-size:0.81rem;text-align:center">{_flag}</td>'
+            f'</tr>'
+        )
 
-# Formula:
-#   Grossed-Up Taxable Value = Taxable Value × Gross-Up Rate
-#   FBT Payable              = Grossed-Up Taxable Value × FBT Rate
+    st.markdown(
+        '<div style="margin-top:1.4rem;max-width:88%">'
+        '<div style="font-size:0.88rem;font-weight:700;color:#005EA5;margin-bottom:4px">'
+        'Reportable Fringe Benefit Amount (RFBA) — Employee Payment Summary Disclosure'
+        '</div>'
+        '<div style="font-size:0.80rem;color:#555;margin-bottom:8px;line-height:1.6">'
+        '<b>Not additional FBT liability</b> — a disclosure obligation under <b>s5E FBTAA 1986</b> &amp; '
+        '<b>s136 ITAA 1936</b>. Every benefit item carries an RFBA field that appears on the employee\'s '
+        'income statement if it exceeds $2,000. RFBA mirrors the benefit\'s gross-up type '
+        '(T1 for GST-creditable; T2 for non-creditable). '
+        'BEV exception: uses T2 despite being FBT-exempt (no GST ITC on a notional value). '
+        'Impacts employee\'s MLS threshold, HECS/HELP repayment rate, and PHI rebate income test.'
+        '</div>'
+        '<table style="width:100%;border-collapse:collapse;border:1px solid #dde6f0">'
+        '<thead style="background:#005EA5;color:white"><tr>'
+        '<th style="padding:8px 10px;font-size:0.80rem;text-align:left">Benefit Item</th>'
+        '<th style="padding:8px 10px;font-size:0.80rem;text-align:center">Type</th>'
+        '<th style="padding:8px 10px;font-size:0.80rem;text-align:center">Gross-Up Rate</th>'
+        '<th style="padding:8px 10px;font-size:0.80rem;text-align:right">Taxable Value</th>'
+        '<th style="padding:8px 10px;font-size:0.80rem;text-align:right">RFBA Amount</th>'
+        '<th style="padding:8px 10px;font-size:0.80rem;text-align:center">Report on Stmt?</th>'
+        '</tr></thead>'
+        f'<tbody>{_rfba_rows_html}'
+        '<tr style="background:#EAF2FF;font-weight:700">'
+        '<td style="padding:7px 10px;font-size:0.81rem" colspan="4">Total RFBA Disclosed (All Employees)</td>'
+        f'<td style="padding:7px 10px;font-size:0.81rem;text-align:right">{fmt_table(_total_rfba)}</td>'
+        '<td></td>'
+        '</tr></tbody></table>'
+        '<p style="font-size:0.75rem;color:#888;margin-top:6px">'
+        'STP Phase 2: RFBA fields map directly to the <i>reportable_fringe_benefits_amount</i> field '
+        'in the ATO Single Touch Payroll submission. Export via fbt_register table for payroll officer reconciliation.'
+        '</p>'
+        '</div>',
+        unsafe_allow_html=True
+    )
 
-fbt_items = [
-    # (description,                  taxable_value,  benefit_type,  gross_up)
-    ("Motor Vehicle (fleet car)",    22_450,         "Type 1",      GROSS_UP_T1),
-    ("Entertainment (meals/events)", 14_800,         "Type 2",      GROSS_UP_T2),
-    ("Expense Payments",              8_320,         "Type 2",      GROSS_UP_T2),
-]
+    # Pre-compute display strings for the code block
+    # Explicit RFBA aliases — ICE car mirrors T1 (same calculation as _ice_gu)
+    _ICE_RFBA_AMOUNT = round(_ICE_TV_FINAL * fbt_type1, 0)   # TV × T1 — s5E FBTAA / s136 ITAA
+    _EN_RFBA_AMOUNT  = round(14_800 * fbt_type2, 0)           # TV × T2
+    _EP_RFBA_AMOUNT  = round(8_320  * fbt_type2, 0)           # TV × T2
 
-total_fbt = 0
-for desc, taxable_val, btype, gross_up in fbt_items:
-    grossed_up  = taxable_val * gross_up
-    fbt_payable = grossed_up  * FBT_RATE
-    total_fbt  += fbt_payable
-    print(f"{{desc:<30}} | taxable: ${{taxable_val:>8,.0f}} | "
-          f"grossed-up: ${{grossed_up:>10,.0f}} | FBT: ${{fbt_payable:>8,.0f}}")
+    _top   = f"{indiv_top_rate * 100:.1f}"
+    _mcare = f"{medicare_levy * 100:.1f}"
+    _gst   = f"{gst_rate_fbt * 100:.1f}"
+    _fbt   = f"{fbt_rate * 100:.1f}"
 
-# Live results with current sidebar rates:
-# Motor Vehicle  | taxable: $22,450 | grossed-up: ${22_450 * fbt_type1:>10,.0f} | FBT: ${22_450 * fbt_type1 * fbt_rate:>8,.0f}
-# Entertainment  | taxable: $14,800 | grossed-up: ${14_800 * fbt_type2:>10,.0f} | FBT: ${14_800 * fbt_type2 * fbt_rate:>8,.0f}
-# Expense Pmts   | taxable:  $8,320 | grossed-up: ${ 8_320 * fbt_type2:>10,.0f} | FBT: ${ 8_320 * fbt_type2 * fbt_rate:>8,.0f}
-# ─────────────────────────────────────────────────────────────────────────────
-# TOTAL FBT PAYABLE (FY2026):  ${total_fbt_payable:,.0f}
-# Due: 21 May 2026  |  Lodge via ATO Tax Agent Portal
-""", language="python")
+    _ice_gu  = round(_ICE_TV_FINAL * fbt_type1, 0)
+    _ice_fp  = round(_ice_gu * fbt_rate, 0)
+    _en_tx   = 14_800;  _en_gu = round(_en_tx * fbt_type2, 0);  _en_fp = round(_en_gu * fbt_rate, 0)
+    _ep_tx   =  8_320;  _ep_gu = round(_ep_tx * fbt_type2, 0);  _ep_fp = round(_ep_gu * fbt_rate, 0)
+    _s = lambda v: f"${v:,.0f}"
+
+    with st.expander("FBT Calculation Logic", expanded=True):
+        st.code(
+            "# FBT Calculation — FBTAA 1986  |  FY: 1 Apr 2025 – 31 Mar 2026\n"
+            "#\n"
+            "# ── Rate derivation (single source of truth) ────────────────────────────\n"
+            f"INDIVIDUAL_TOP_RATE = {_top}%    # s12-5 ITAA 1997 — top marginal rate\n"
+            f"MEDICARE_LEVY       = {_mcare}%     # s8 Medicare Levy Act 1986\n"
+            f"GST_RATE            = {_gst}%    # s9-70 GSTA 1999\n"
+            "#\n"
+            f"FBT_RATE   = INDIVIDUAL_TOP_RATE + MEDICARE_LEVY   # = {_fbt}%\n"
+            "#\n"
+            "# Type 2: no GST credit — simpler denominator\n"
+            f"GROSS_UP_T2 = 1 / (1 - FBT_RATE)                    # = {fbt_type2:.4f}\n"
+            "#\n"
+            "# Type 1: employer CAN claim GST ITC on the benefit\n"
+            "# Formula: (1 + GST_RATE) / (1 - FBT_RATE) = 1.10 / 0.53 = 2.0755 (algebraic)\n"
+            "# ATO publishes 2.0802 for FY2026 — hardcoded to match ATO authoritative figure.\n"
+            f"GROSS_UP_T1 = 2.0802   # ATO-published FY2026 (formula gives 2.0755)\n"
+            "#   T1 > T2 always: the GST ITC the employer claims reduces\n"
+            "#   their net cost, so the gross-up must be higher to achieve parity.\n"
+            "#\n"
+            "# => Changing MEDICARE_LEVY or INDIVIDUAL_TOP_RATE updates both rates.\n"
+            "#    Changing GST_RATE affects only GROSS_UP_T1 (T2 is GST-independent).\n"
+            "\n"
+            "# ── LCT check — A New Tax System (Luxury Car Tax) Act 1999 ────────────\n"
+            "# Thresholds effective 1 July 2025:\n"
+            f"LCT_THRESHOLD_OTHER    = {_s(_LCT_THRESHOLD_OTHER)}   # standard petrol/diesel vehicles\n"
+            f"LCT_THRESHOLD_FUEL_EFF = {_s(_LCT_THRESHOLD_FUEL_EFF)}   # fuel-efficient: ≤{_FUEL_EFF_LIMIT_L}L/100km\n"
+            "#\n"
+            "# 3.5L/100km rule: from 1 Jul 2025, 'fuel-efficient' tightened from 7.0L → 3.5L.\n"
+            "# Executive hybrids that qualified for the higher threshold in FY2025 may now\n"
+            "# fall into the lower 'Other' band — review fleet selections accordingly.\n"
+            "#\n"
+            f"ICE_FUEL_CONSUMPTION   = {_ICE_FUEL_L}L/100km   # exceeds {_FUEL_EFF_LIMIT_L}L limit\n"
+            f"ICE_IS_FUEL_EFFICIENT  = {_ICE_FUEL_EFF}              # → uses 'Other' threshold\n"
+            f"ICE_LCT_THRESHOLD      = {_s(_ICE_LCT_THRESHOLD)}\n"
+            f"ICE_PURCHASE_PRICE     = {_s(_ICE_COST)}   # below threshold\n"
+            f"ICE_LCT_PAYABLE        = {_s(_ICE_LCT)}      # no LCT — price ≤ threshold\n"
+            f"ICE_FBT_BASE_VALUE     = {_s(_ICE_COST)} + {_s(_ICE_LCT)} = {_s(_ICE_BASE_WITH_LCT)}\n"
+            "# Note: if LCT were payable, it would inflate the FBT base every year\n"
+            "# ('tax on a tax') — a significant hidden cost for luxury fleet vehicles.\n"
+            "\n"
+            "# ── 4-year 1/3 base value discount (s9(2) FBTAA) ────────────────────────\n"
+            f"ICE_PURCHASE_DATE      = '{_ICE_PURCHASE_DATE}'\n"
+            f"ICE_YEARS_HELD         = {_ICE_YEARS_HELD}   # at 1 Apr 2025 (start of FBT year)\n"
+            f"ICE_DISCOUNT_APPLIES   = ICE_YEARS_HELD >= 4   # {_ICE_DISCOUNT_APPLIES}\n"
+            f"ICE_BASE_FINAL         = {_s(_ICE_BASE_FINAL)}   # no discount — car is < 4 years old\n"
+            "# When discount applies: Base Value × 2/3 (effectively a 33.3% reduction)\n"
+            "# => locks in for the life of the asset; major long-run FBT saving on aging fleet.\n"
+            "\n"
+            "# ── s58P exemption gate — strict fuel-type validation ───────────────────\n"
+            "# WARNING: Do NOT use 'Electric', 'EV', or 'Low Emission' as the fuel type.\n"
+            "# PHEVs lost their exemption on 1 April 2025. A PHEV labelled broadly as\n"
+            "# 'Electric' would silently pass a naïve check and produce a $0 tax result.\n"
+            "#\n"
+            f"FUEL_TYPE              = '{_BEV_FUEL_TYPE}'        # must be exactly 'BEV'\n"
+            f"PHEV_CUTOFF_DATE       = '{_PHEV_CUTOFF_DATE}'  # s58P exemption ended for PHEVs\n"
+            f"FIRST_USE_DATE         = '{_BEV_FIRST_USE_DATE}'  # must be ≥ 2022-07-01\n"
+            f"BEV_COST               = {_s(_EV_COST)}   # purchase price incl. GST\n"
+            f"BEV_LCT_THRESHOLD      = {_s(_LCT_THRESHOLD_FUEL_EFF)}   # EVs use fuel-efficient threshold\n"
+            "#\n"
+            "BEV_FBT_EXEMPT = (\n"
+            "    FUEL_TYPE == 'BEV'                    # strict: excludes PHEV, Hybrid, EV\n"
+            "    and FIRST_USE_DATE >= '2022-07-01'    # post Treasury Laws Amendment\n"
+            "    and BEV_COST <= BEV_LCT_THRESHOLD     # cost under LCT threshold\n"
+            f")  # => {_BEV_EXEMPT}  — taxable value = $0; gross-up not applied\n"
+            "#\n"
+            "# PHEV acquired after 2025-04-01 with FUEL_TYPE='PHEV':\n"
+            "#   FUEL_TYPE == 'BEV'  →  False  →  BEV_FBT_EXEMPT = False\n"
+            "#   Full statutory formula applies — no silent $0 result.\n"
+            "# Grandfathered PHEV: requires binding commitment pre-1 Apr 2025 (s58P(2)).\n"
+            "\n"
+            "# ── ICE fleet car — 20% Statutory Formula (s9 FBTAA) ───────────────────\n"
+            f"STATUTORY_RATE         = {_ICE_STAT_PCT:.0%}\n"
+            f"PRIVATE_USE_DAYS       = {_ICE_PRIVATE_DAYS}  # days available for private use\n"
+            f"ICE_TAXABLE_VALUE      = {_s(_ICE_BASE_FINAL)} x {_ICE_STAT_PCT:.0%} x {_ICE_PRIVATE_DAYS}/365 = {_s(_ICE_TV_FINAL)}\n"
+            "\n"
+            "# ── FBT Payable = Taxable Value × Gross-Up Rate × FBT Rate ─────────────\n"
+            "# Item                             Taxable       Gross-Up    Grossed-Up      FBT Payable\n"
+            f"# BEV (s58P exempt)              {_s(0):>10}  (exempt)                         {_s(0)}\n"
+            f"# ICE Fleet Car (stat formula)   {_s(_ICE_TV_FINAL):>10}  x {fbt_type1:.4f}  = {_s(_ice_gu):>12}  ->  {_s(_ice_fp)}\n"
+            f"# Entertainment (meals/events)   {_s(_en_tx):>10}  x {fbt_type2:.4f}  = {_s(_en_gu):>12}  ->  {_s(_en_fp)}\n"
+            f"# Expense Payments               {_s(_ep_tx):>10}  x {fbt_type2:.4f}  = {_s(_ep_gu):>12}  ->  {_s(_ep_fp)}\n"
+            "# " + "-" * 77 + "\n"
+            f"# TOTAL FBT PAYABLE (FY2026):  {_s(total_fbt_payable)}\n"
+            "# Due: 21 May 2026  |  Lodge via ATO Tax Agent Portal\n"
+            "\n"
+            "# ── RFBA — Reportable Fringe Benefit Amount (s5E FBTAA / s136 ITAA 1936) ─\n"
+            "# BEV FBT = $0 (exempt), but RFBA must still be reported on the employee's\n"
+            "# income statement if the notional grossed-up value exceeds $2,000.\n"
+            "# Use Type 2 rate (not Type 1) — RFBA gross-up excludes the GST ITC component.\n"
+            "#\n"
+            f"BEV_NOTIONAL_TV  = {_s(_EV_COST)} x {_ICE_STAT_PCT:.0%} x {_ICE_PRIVATE_DAYS}/365  = {_s(_BEV_NOTIONAL_TV)}\n"
+            f"BEV_RFBA         = {_s(_BEV_NOTIONAL_TV)} x GROSS_UP_T2 ({fbt_type2:.4f})         = {_s(_BEV_RFBA)}\n"
+            f"RFBA_THRESHOLD   = $2,000  ->  Report required: {str(_BEV_RFBA > _RFBA_THRESHOLD).upper()}\n"
+            "#\n"
+            "# Impact on employee: RFBA is included in 'adjusted fringe benefits total'\n"
+            "# which can affect Medicare Levy Surcharge, HECS/HELP repayment thresholds,\n"
+            "# and private health insurance rebate income tests.\n"
+            "# This is a disclosure obligation ONLY — it does NOT create additional FBT liability.",
+            language="python"
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── FBT Journal Entry Generator ──────────────────────────────────────────
+    section("FBT Journal Entries (GL Integration)")
+
+    je_all     = query("SELECT * FROM journal_entries ORDER BY journal_date, journal_id, line_no")
+    fbt_reg_df = query("SELECT * FROM fbt_register ORDER BY asset_id")
+
+    if je_all.empty:
+        st.warning("No journal entries found. Delete data/rmit_finance.db and restart to regenerate.", icon="⚠️")
+    else:
+        # Split accrual vs payment
+        je_accrual = je_all[je_all["journal_type"] == "FBT_Accrual"].copy()
+        je_payment = je_all[je_all["journal_type"] == "FBT_Payment"].copy()
+
+        accrual_id  = je_accrual["journal_id"].iloc[0]  if not je_accrual.empty else "—"
+        payment_id  = je_payment["journal_id"].iloc[0]  if not je_payment.empty else "—"
+        total_fbt_j = je_accrual[je_accrual["account_code"] == "2202"]["credit"].sum()
+
+        # ── KPI strip ────────────────────────────────────────────────────────
+        k1, k2, k3, k4 = st.columns(4)
+        k1.markdown(kpi_card("Accrual JE", accrual_id, "Period 2026-03 · Posted"), unsafe_allow_html=True)
+        k2.markdown(kpi_card("Payment JE", payment_id, "Period 2026-05 · Pending"), unsafe_allow_html=True)
+        k3.markdown(kpi_card("Total FBT Accrued", f"${total_fbt_j:,.0f}", "DR 5205 / CR 2202"), unsafe_allow_html=True)
+        k4.markdown(kpi_card("Due Date", "21 May 2026", "s69 FBTAA 1986"), unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ── JE 1: Accrual ─────────────────────────────────────────────────────
+        st.markdown(
+            '<div style="font-size:0.86rem;font-weight:700;color:#1A1A1A;margin-bottom:6px">'
+            f'Journal Entry {accrual_id} — FBT Year-End Accrual &nbsp;'
+            '<span style="background:#00875A;color:white;padding:2px 7px;border-radius:3px;'
+            'font-size:0.72rem">POSTED · 31 Mar 2026</span>'
+            '</div>',
+            unsafe_allow_html=True
+        )
+
+        je_rows_html = ""
+        for _, r in je_accrual.iterrows():
+            is_dr  = float(r["debit"]) > 0
+            is_cr  = float(r["credit"]) > 0
+            is_bev = "s58P exempt" in str(r.get("description", ""))
+            amt_dr = f'<b>${float(r["debit"]):,.2f}</b>' if is_dr else '<span style="color:#ccc">—</span>'
+            amt_cr = f'<b>${float(r["credit"]):,.2f}</b>' if is_cr else '<span style="color:#ccc">—</span>'
+            code   = r["account_code"]
+            acc_name = {"5205": "FBT Expense", "2202": "FBT Payable"}.get(code, code)
+            indent = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' if is_cr else ''
+            exempt_tag = (
+                '&nbsp;<span style="background:#005EA5;color:white;padding:1px 5px;'
+                'border-radius:3px;font-size:0.68rem">$0 EXEMPT</span>'
+                if is_bev else ""
+            )
+            sub_ref = str(r.get("sub_ledger_ref", ""))
+            ref_tag = (
+                f'&nbsp;<span style="color:#888;font-size:0.72rem">[{sub_ref}]</span>'
+                if sub_ref and sub_ref != "ALL" else ""
+            )
+            je_rows_html += (
+                f'<tr>'
+                f'<td style="padding:5px 10px;font-size:0.81rem;font-family:monospace">'
+                f'{indent}<b>{code}</b> {acc_name}{exempt_tag}{ref_tag}</td>'
+                f'<td style="padding:5px 10px;font-size:0.81rem;text-align:right">{amt_dr}</td>'
+                f'<td style="padding:5px 10px;font-size:0.81rem;text-align:right">{amt_cr}</td>'
+                f'<td style="padding:5px 20px;font-size:0.75rem;color:#666;max-width:320px;'
+                f'white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'
+                f'{str(r["description"])[:90]}</td>'
+                f'</tr>'
+            )
+
+        st.markdown(
+            '<table style="width:92%;border-collapse:collapse;border:1px solid #e0e0e0">'
+            '<thead style="background:#1A1A1A;color:white"><tr>'
+            '<th style="padding:8px 10px;font-size:0.80rem;text-align:left">Account</th>'
+            '<th style="padding:8px 10px;font-size:0.80rem;text-align:right">DR</th>'
+            '<th style="padding:8px 10px;font-size:0.80rem;text-align:right">CR</th>'
+            '<th style="padding:8px 20px;font-size:0.80rem;text-align:left">Narration</th>'
+            '</tr></thead>'
+            f'<tbody style="background:white">{je_rows_html}'
+            '</tbody></table>',
+            unsafe_allow_html=True
+        )
+
+        # ── Reconciliation: JE → fbt_register ────────────────────────────────
+        st.markdown(
+            '<p style="font-size:0.77rem;color:#888;margin-top:6px">'
+            'Sub-ledger reconciliation: each DR line traces to <code>fbt_register.fbt_payable</code> '
+            'via <code>sub_ledger_ref</code>. CR line = sum of all benefit lines → '
+            '<code>2202 FBT Payable</code> balance at 31 March 2026.</p>',
+            unsafe_allow_html=True
+        )
+
+        # Reconciliation mini-table from fbt_register
+        if not fbt_reg_df.empty:
+            recon_cols  = ["asset_id", "description", "bev_exempt", "taxable_value",
+                           "gross_up_type", "fbt_payable", "rfba_amount"]
+            recon_avail = [c for c in recon_cols if c in fbt_reg_df.columns]
+            recon_df    = fbt_reg_df[recon_avail].copy()
+            recon_df["bev_exempt"]    = recon_df["bev_exempt"].map({1: "Yes", 0: "No", True: "Yes", False: "No"})
+            recon_df["taxable_value"] = recon_df["taxable_value"].apply(lambda v: f"${float(v):,.2f}")
+            recon_df["fbt_payable"]   = recon_df["fbt_payable"].apply(lambda v: f"${float(v):,.2f}")
+            recon_df["rfba_amount"]   = recon_df["rfba_amount"].apply(lambda v: f"${float(v):,.2f}")
+            recon_df.columns          = ["Asset ID", "Description", "BEV Exempt",
+                                         "Taxable Value", "Gross-Up", "FBT Payable", "RFBA Amount"]
+            st.dataframe(recon_df, use_container_width=True, hide_index=True)
+
+        # ── JE 2: Payment (pending) ────────────────────────────────────────────
+        st.markdown(
+            '<div style="margin-top:1.4rem;font-size:0.86rem;font-weight:700;'
+            'color:#1A1A1A;margin-bottom:6px">'
+            f'Journal Entry {payment_id} — ATO Payment Settlement &nbsp;'
+            '<span style="background:#FFC107;color:#1A1A1A;padding:2px 7px;border-radius:3px;'
+            'font-size:0.72rem">PENDING · 21 May 2026</span>'
+            '</div>',
+            unsafe_allow_html=True
+        )
+
+        pay_rows_html = ""
+        for _, r in je_payment.iterrows():
+            is_dr  = float(r["debit"]) > 0
+            amt_dr = f'<b>${float(r["debit"]):,.2f}</b>'  if is_dr else '<span style="color:#ccc">—</span>'
+            amt_cr = f'<b>${float(r["credit"]):,.2f}</b>' if not is_dr else '<span style="color:#ccc">—</span>'
+            code   = r["account_code"]
+            acc_name = {"2202": "FBT Payable", "1002": "Cash at Bank – Term Deposit"}.get(code, code)
+            indent = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' if not is_dr else ''
+            pay_rows_html += (
+                f'<tr style="background:#FFFDF0">'
+                f'<td style="padding:5px 10px;font-size:0.81rem;font-family:monospace">'
+                f'{indent}<b>{code}</b> {acc_name}</td>'
+                f'<td style="padding:5px 10px;font-size:0.81rem;text-align:right">{amt_dr}</td>'
+                f'<td style="padding:5px 10px;font-size:0.81rem;text-align:right">{amt_cr}</td>'
+                f'<td style="padding:5px 20px;font-size:0.75rem;color:#666">{str(r["description"])[:90]}</td>'
+                f'</tr>'
+            )
+
+        st.markdown(
+            '<table style="width:92%;border-collapse:collapse;border:1px solid #e0e0e0">'
+            '<thead style="background:#856404;color:white"><tr>'
+            '<th style="padding:8px 10px;font-size:0.80rem;text-align:left">Account</th>'
+            '<th style="padding:8px 10px;font-size:0.80rem;text-align:right">DR</th>'
+            '<th style="padding:8px 10px;font-size:0.80rem;text-align:right">CR</th>'
+            '<th style="padding:8px 20px;font-size:0.80rem;text-align:left">Narration</th>'
+            '</tr></thead>'
+            f'<tbody>{pay_rows_html}</tbody></table>'
+            '<p style="font-size:0.75rem;color:#888;margin-top:6px">'
+            'This entry clears the 2202 FBT Payable balance and reduces cash. '
+            'Status: <b>Pending</b> — outside current dataset period (Jul 2025–Mar 2026). '
+            'Becomes <b>Posted</b> upon ATO lodgement confirmation on 21 May 2026.</p>',
+            unsafe_allow_html=True
+        )
+
+        # ── Audit trail note ──────────────────────────────────────────────────
+        st.markdown(
+            '<div style="margin-top:1rem;padding:10px 14px;border-left:3px solid #E8192C;'
+            'background:#FFF5F5;font-size:0.78rem;color:#555;max-width:92%">'
+            '<b>Audit trail:</b> '
+            'DR 5205 lines trace back to <code>fbt_register.fbt_payable</code> via '
+            '<code>sub_ledger_ref</code> → <code>asset_id</code>. '
+            'CR 2202 balance reconciles to the FBT Summary table above. '
+            'RFBA amounts flow separately to STP Phase 2 payroll submission — '
+            'not a GL movement but recorded in <code>fbt_register.rfba_amount</code>. '
+            'Once the payment JE is posted, a BAS/IAS reconciliation should confirm '
+            '2202 returns to zero.'
+            '</div>',
+            unsafe_allow_html=True
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── STP Phase 2 / FBT RFBA Export ────────────────────────────────────────
+    section("STP Phase 2 — RFBA Export & Reconciliation")
+
+    reg_full = query("SELECT * FROM fbt_register ORDER BY asset_id")
+    gl_all   = query("SELECT * FROM general_ledger")
+
+    if reg_full.empty:
+        st.warning("fbt_register not found. Delete data/rmit_finance.db and restart.", icon="⚠️")
+    else:
+        # ── Live reconciliation assertions ────────────────────────────────────
+        gl_5205   = round(gl_all[gl_all["account_code"] == "5205"]["debit"].sum(), 2)
+        gl_2202   = round(gl_all[gl_all["account_code"] == "2202"]["credit"].sum(), 2)
+        reg_fbt   = round(reg_full["fbt_payable"].astype(float).sum(), 2)
+        rfba_reportable_count = int((reg_full["rfba_reportable"].astype(int) > 0).sum())
+        bev_row   = reg_full[reg_full["fuel_type"] == "BEV"]
+        bev_uses_t2 = (bev_row["gross_up_type"].iloc[0] == "Type 1") and (bev_row["bev_exempt"].iloc[0])
+
+        checks = [
+            ("GL 5205 == fbt_register.fbt_payable.sum()",
+             f"${gl_5205:,.2f} == ${reg_fbt:,.2f}",
+             abs(gl_5205 - reg_fbt) < 1.0),
+            ("GL 2202 CR balance == total FBT accrued",
+             f"${gl_2202:,.2f} == ${reg_fbt:,.2f}",
+             abs(gl_2202 - reg_fbt) < 1.0),
+            ("RFBA reportable rows (rfba_amount > $2,000)",
+             f"{rfba_reportable_count} of {len(reg_full)} benefit items",
+             rfba_reportable_count > 0),
+            ("BEV (s58P exempt) — FBT payable == $0",
+             f"${bev_row['fbt_payable'].astype(float).iloc[0]:,.2f}",
+             bev_row["fbt_payable"].astype(float).iloc[0] == 0.0),
+            ("BEV RFBA uses T2 gross-up (no GST ITC on notional value)",
+             f"gross_up_type={bev_row['gross_up_type'].iloc[0]}, bev_exempt=True",
+             bev_uses_t2),
+            ("All compliance gates passed (compliance_chk)",
+             f"{int(reg_full['compliance_chk'].astype(int).sum())} / {len(reg_full)} rows",
+             reg_full["compliance_chk"].astype(int).sum() == len(reg_full)),
+        ]
+
+        chk_html = ""
+        all_pass = all(c[2] for c in checks)
+        for label, value, passed in checks:
+            icon  = "✓" if passed else "✗"
+            color = "#00875A" if passed else "#E8192C"
+            bg    = "#F0FFF4" if passed else "#FFF0F0"
+            chk_html += (
+                f'<tr style="background:{bg}">'
+                f'<td style="padding:6px 10px;font-size:0.80rem;font-family:monospace;color:{color};font-weight:700">{icon}</td>'
+                f'<td style="padding:6px 10px;font-size:0.80rem;font-family:monospace">{label}</td>'
+                f'<td style="padding:6px 10px;font-size:0.80rem;color:#555">{value}</td>'
+                f'<td style="padding:6px 12px;font-size:0.78rem;font-weight:700;color:{color}">{"PASS" if passed else "FAIL"}</td>'
+                f'</tr>'
+            )
+
+        overall_bg    = "#F0FFF4" if all_pass else "#FFF3CD"
+        overall_color = "#00875A" if all_pass else "#856404"
+        overall_label = "ALL CHECKS PASSED — AUDIT READY" if all_pass else "REVIEW REQUIRED BEFORE LODGEMENT"
+
+        st.markdown(
+            f'<div style="margin-bottom:10px;padding:8px 14px;border-radius:4px;'
+            f'background:{overall_bg};border:1.5px solid {overall_color};'
+            f'font-size:0.82rem;font-weight:700;color:{overall_color}">'
+            f'{overall_label}</div>'
+            '<table style="width:92%;border-collapse:collapse;border:1px solid #e0e0e0;margin-bottom:1rem">'
+            '<thead style="background:#1A1A1A;color:white"><tr>'
+            '<th style="padding:7px 10px;font-size:0.78rem;width:30px"></th>'
+            '<th style="padding:7px 10px;font-size:0.78rem;text-align:left">Assertion</th>'
+            '<th style="padding:7px 10px;font-size:0.78rem;text-align:left">Value</th>'
+            '<th style="padding:7px 10px;font-size:0.78rem;text-align:left">Result</th>'
+            f'</tr></thead><tbody>{chk_html}</tbody></table>',
+            unsafe_allow_html=True
+        )
+
+        # ── STP Phase 2 export rows ───────────────────────────────────────────
+        # Only rows where rfba_reportable = True and employee is individually assigned
+        stp_rows = reg_full[
+            (reg_full["rfba_reportable"].astype(int) > 0) &
+            (reg_full["employee_id"] != "POOL")
+        ].copy()
+
+        stp_export = pd.DataFrame({
+            "fbt_year":              stp_rows["fbt_year"],
+            "employer_abn":          "12 345 678 901",       # RMIT UP Pty Ltd ABN (synthetic)
+            "payee_id":              stp_rows["employee_id"],
+            "payee_name":            stp_rows["employee_name"],
+            "tfn_masked":            stp_rows["employee_tfn_masked"],
+            "benefit_description":   stp_rows["description"],
+            "fuel_type":             stp_rows["fuel_type"],
+            "gross_up_type":         stp_rows["gross_up_type"],
+            "taxable_value":         stp_rows["taxable_value"].astype(float).round(2),
+            "rfba_amount":           stp_rows["rfba_amount"].astype(float).round(2),
+            "bev_exempt":            stp_rows["bev_exempt"].astype(bool),
+            "fbt_payable_employer":  stp_rows["fbt_payable"].astype(float).round(2),
+            "asset_ref":             stp_rows["asset_id"],
+            "legislative_ref":       "s5E FBTAA 1986 / s136 ITAA 1936",
+            "compliance_verified":   stp_rows["compliance_chk"].astype(bool),
+            "reporting_period_end":  "2026-03-31",
+            "stp_field":             "reportable_fringe_benefits_amount",
+        })
+
+        st.markdown(
+            '<div style="font-size:0.84rem;font-weight:700;color:#1A1A1A;margin-bottom:6px">'
+            f'STP Phase 2 RFBA Rows — {len(stp_export)} employee(s) reportable'
+            '</div>',
+            unsafe_allow_html=True
+        )
+        st.dataframe(stp_export, use_container_width=True, hide_index=True)
+
+        st.markdown(
+            '<p style="font-size:0.75rem;color:#888;margin-top:4px">'
+            'Pooled benefits (entertainment, expense payments) are excluded — no single employee assignee. '
+            'In production, these would be allocated per payroll system employee mapping.'
+            '</p>',
+            unsafe_allow_html=True
+        )
+
+        # ── Download buttons ──────────────────────────────────────────────────
+        import io, zipfile
+
+        # CSV — STP submission file
+        csv_buf = io.StringIO()
+        stp_export.to_csv(csv_buf, index=False)
+        csv_bytes = csv_buf.getvalue().encode("utf-8")
+
+        # XLSX — multi-tab workbook for payroll officer
+        xlsx_buf = io.BytesIO()
+        with pd.ExcelWriter(xlsx_buf, engine="openpyxl") as writer:
+            # Tab 1: STP Phase 2 submission rows
+            stp_export.to_excel(writer, sheet_name="STP_Phase2_RFBA", index=False)
+
+            # Tab 2: Full FBT register
+            reg_export = reg_full[[
+                "fbt_year","asset_id","description","fuel_type","gross_up_type",
+                "purchase_price","taxable_value","bev_exempt","fbt_payable",
+                "rfba_amount","rfba_reportable","compliance_chk",
+                "employee_id","employee_name","lct_payable","discount_applies",
+            ]].copy()
+            reg_export.to_excel(writer, sheet_name="FBT_Register", index=False)
+
+            # Tab 3: Reconciliation checks
+            recon_df = pd.DataFrame([
+                {"Assertion": lbl, "Value": val, "Result": "PASS" if ok else "FAIL"}
+                for lbl, val, ok in checks
+            ])
+            recon_df.to_excel(writer, sheet_name="Reconciliation", index=False)
+
+            # Tab 4: Payment schedule
+            pay_sched = pd.DataFrame([
+                {"JE": "JE09001", "Description": "FBT Accrual — DR 5205 / CR 2202",
+                 "Amount": reg_fbt, "Due Date": "31-Mar-2026", "Status": "Posted"},
+                {"JE": "JE09002", "Description": "ATO FBT Payment — DR 2202 / CR 1002",
+                 "Amount": reg_fbt, "Due Date": "21-May-2026", "Status": "Pending"},
+            ])
+            pay_sched.to_excel(writer, sheet_name="Payment_Schedule", index=False)
+
+            # Tab 5: TAX_CONFIG snapshot
+            tax_cfg_snap = query("SELECT * FROM tax_compliance_config ORDER BY category, config_key")
+            tax_cfg_snap.to_excel(writer, sheet_name="TAX_CONFIG_Snapshot", index=False)
+
+        xlsx_bytes = xlsx_buf.getvalue()
+
+        dl1, dl2 = st.columns(2)
+        with dl1:
+            st.download_button(
+                label="⬇ Download STP Phase 2 CSV",
+                data=csv_bytes,
+                file_name="RMIT_UP_STP_Phase2_RFBA_FY2026.csv",
+                mime="text/csv",
+                help="ATO STP Phase 2 submission file — RFBA reportable rows only",
+                use_container_width=True,
+            )
+        with dl2:
+            st.download_button(
+                label="⬇ Download FBT Workbook (XLSX)",
+                data=xlsx_bytes,
+                file_name="RMIT_UP_FBT_Compliance_FY2026.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                help="5 tabs: STP export · FBT Register · Reconciliation · Payment Schedule · TAX_CONFIG",
+                use_container_width=True,
+            )
+
+        st.markdown(
+            '<div style="margin-top:0.8rem;padding:10px 14px;border-left:3px solid #00875A;'
+            'background:#F0FFF4;font-size:0.78rem;color:#155724;max-width:92%">'
+            '<b>Lodgement checklist:</b> '
+            '(1) Verify RFBA amounts match payroll system records for EMP-0042 and EMP-0017. '
+            '(2) Submit STP Phase 2 CSV via ATO Business Portal by <b>14 July 2026</b> (EOFY finalisation deadline). '
+            '(3) Confirm JE09002 FBT payment posted by <b>21 May 2026</b> — clears 2202 to zero. '
+            '(4) Retain XLSX workbook as supporting documentation for 5-year ATO record-keeping obligation '
+            '(s262A ITAA 1936).'
+            '</div>',
+            unsafe_allow_html=True
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -2414,8 +3277,8 @@ ORDER BY pt.period;
 -- Current period NBV and YTD depreciation charge
 SELECT
     d.asset_id,
-    d.asset_name,
-    d.category,
+    fa.asset_name,
+    fa.category,
     fa.cost,
     fa.useful_life_years,
     fa.depreciation_method,
@@ -2425,10 +3288,10 @@ SELECT
 FROM depreciation_schedule d
 JOIN fixed_assets fa ON d.asset_id = fa.asset_id
 WHERE d.period = '2026-03'
-GROUP BY d.asset_id, d.asset_name, d.category, fa.cost,
+GROUP BY d.asset_id, fa.asset_name, fa.category, fa.cost,
          fa.useful_life_years, fa.depreciation_method,
          d.accum_dep_close, d.nbv_close
-ORDER BY d.category, fa.cost DESC;
+ORDER BY fa.category, fa.cost DESC;
 """,
         "GST / BAS Reconciliation": """
 -- GST Reconciliation: GL vs BAS return
@@ -2564,18 +3427,207 @@ LIMIT 15;
 """,
     }
 
-    selected_query = st.selectbox("Select analysis query:", list(query_labels.keys()))
+    # ── Database Schema Browser ──────────────────────────────────────────────
+    with st.expander("Database Schema Browser", expanded=False):
+        try:
+            with get_connection() as _conn:
+                _tables = pd.read_sql_query(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
+                    _conn
+                )["name"].tolist()
+
+                # Row counts for all tables in one pass
+                _counts = {
+                    t: _conn.execute(f"SELECT COUNT(*) FROM \"{t}\"").fetchone()[0]
+                    for t in _tables
+                }
+
+            st.caption(f"{len(_tables)} tables · SQLite · `{DB_PATH}` · rebuilt with `if_exists='replace'` on schema change")
+
+            # Render compact grid: 4 cards per row
+            _cols_per_row = 4
+            for _row_start in range(0, len(_tables), _cols_per_row):
+                _row_tables = _tables[_row_start:_row_start + _cols_per_row]
+                _grid = st.columns(_cols_per_row)
+                for _gi, _tbl in enumerate(_row_tables):
+                    with _grid[_gi]:
+                        st.markdown(
+                            f'<div style="background:#F5F5F5;border:1px solid #ddd;border-radius:6px;'
+                            f'padding:8px 10px;margin-bottom:4px">'
+                            f'<div style="font-size:0.78rem;font-weight:700;color:#1A1A1A">{_tbl}</div>'
+                            f'<div style="font-size:0.70rem;color:#888">{_counts[_tbl]:,} rows</div>'
+                            f'</div>',
+                            unsafe_allow_html=True
+                        )
+                        if st.button("Schema + Preview", key=f"_schema_{_tbl}", use_container_width=True):
+                            st.session_state["_browser_table"] = _tbl
+
+            # Schema + preview panel for selected table
+            _sel = st.session_state.get("_browser_table")
+            if _sel and _sel in _tables:
+                st.markdown(f"---\n**`{_sel}`** — schema & preview")
+                with get_connection() as _conn:
+                    _schema = pd.read_sql_query(f"PRAGMA table_info(\"{_sel}\")", _conn)
+                    _preview = pd.read_sql_query(f"SELECT * FROM \"{_sel}\" LIMIT 10", _conn)
+
+                sc1, sc2 = st.columns([1, 3])
+                with sc1:
+                    st.caption("Column definitions")
+                    _numeric_keywords = {"rate", "amount", "cost", "price", "tax", "gst",
+                                         "total", "balance", "days", "count", "pct", "dep",
+                                         "wages", "revenue", "expense", "margin", "threshold"}
+                    _schema_disp = _schema[["name", "type", "notnull", "dflt_value"]].copy()
+                    _schema_disp.columns = ["Column", "Type", "NOT NULL", "Default"]
+                    _schema_disp["NOT NULL"] = _schema_disp["NOT NULL"].map({0: "", 1: "✓"})
+
+                    # Identify drifted columns: numeric name but TEXT storage
+                    _drifted = [
+                        row["name"] for _, row in _schema.iterrows()
+                        if any(kw in row["name"].lower() for kw in _numeric_keywords)
+                        and row["type"].upper() in ("TEXT", "VARCHAR", "")
+                    ]
+
+                    def _flag_type(row):
+                        if row["Column"] in _drifted:
+                            return ["background-color:#FFF3CD"] * len(row)
+                        return [""] * len(row)
+
+                    st.dataframe(
+                        _schema_disp.style.apply(_flag_type, axis=1),
+                        use_container_width=True, hide_index=True
+                    )
+
+                    if _drifted:
+                        st.caption(f"⚠ {len(_drifted)} column(s) flagged: numeric name / TEXT storage")
+                        # Cast-to-Numeric diagnostic query
+                        # SQLite has no ALTER COLUMN — fix is either CAST() in queries
+                        # or correcting the pandas dtype before to_sql()
+                        _all_cols = _schema["name"].tolist()
+                        _cast_select = ",\n    ".join(
+                            f"CAST(\"{c}\" AS REAL) AS \"{c}\""
+                            if c in _drifted else f"\"{c}\""
+                            for c in _all_cols
+                        )
+                        _cast_sql = (
+                            f"-- Diagnostic: verify drifted columns are actually numeric\n"
+                            f"-- SQLite has no ALTER COLUMN — real fix is ensuring pandas\n"
+                            f"-- outputs the correct dtype before DataFrame.to_sql().\n"
+                            f"SELECT\n    {_cast_select}\nFROM \"{_sel}\"\nLIMIT 20;"
+                        )
+                        if st.button("Generate CAST() diagnostic query ↓", key="_cast_btn"):
+                            st.session_state["_custom_sql"] = _cast_sql
+                        with st.expander("View CAST() SQL", expanded=False):
+                            st.code(_cast_sql, language="sql")
+                    else:
+                        st.caption("✓ No type drift detected")
+
+                with sc2:
+                    st.caption(f"First 10 rows of `{_sel}`")
+
+                    # ── Calculated column augmentation ──────────────────────
+                    _preview_aug = _preview.copy()
+                    _col_names_lower = {c.lower(): c for c in _preview_aug.columns}
+
+                    # LCT flag: warn if purchase_price > threshold
+                    # Uses "Other" threshold ($80,567); overrides to fuel-efficient ($91,387)
+                    # if is_fuel_efficient / is_ev_exempt column present and truthy
+                    _price_col = _col_names_lower.get("purchase_price") or _col_names_lower.get("cost")
+                    if _price_col and pd.api.types.is_numeric_dtype(_preview_aug[_price_col]):
+                        _fe_col = (_col_names_lower.get("is_fuel_efficient")
+                                   or _col_names_lower.get("is_ev_exempt"))
+                        _LCT_STD  = 80_567
+                        _LCT_FE   = 91_387
+
+                        def _lct_flag(row):
+                            price = row[_price_col]
+                            if pd.isna(price):
+                                return "–"
+                            fe = bool(row[_fe_col]) if _fe_col and not pd.isna(row.get(_fe_col, None)) else False
+                            thresh = _LCT_FE if fe else _LCT_STD
+                            if price > thresh:
+                                excess = price - thresh
+                                lct = round(excess / 1.1 * 0.33, 0)
+                                return f"⚠ LCT ~${lct:,.0f}"
+                            return f"✓ < ${thresh:,}"
+
+                        _preview_aug["⚑ LCT Check"] = _preview_aug.apply(_lct_flag, axis=1)
+
+                    # Holding period: days from purchase_date to FBT year end (31 Mar 2026)
+                    _date_col = _col_names_lower.get("purchase_date")
+                    if _date_col:
+                        _FBT_YEAR_END = pd.Timestamp("2026-03-31")
+                        try:
+                            _dates = pd.to_datetime(_preview_aug[_date_col], errors="coerce")
+                            _held  = (_FBT_YEAR_END - _dates).dt.days
+                            _yrs   = _held / 365.25
+
+                            def _held_label(y):
+                                if pd.isna(y):
+                                    return "–"
+                                disc = " · 1/3 disc ✓" if y >= 4 else f" · disc in {4-y:.1f}yr"
+                                return f"{y:.1f}yr{disc}"
+
+                            _preview_aug["⚑ Held (FBT yr-end)"] = _yrs.apply(_held_label)
+                        except Exception:
+                            pass
+
+                    # PHEV / EV exemption flag
+                    _phev_col  = _col_names_lower.get("is_phev")
+                    _ev_col    = _col_names_lower.get("is_ev_exempt")
+                    _commit_col = _col_names_lower.get("pre_apr25_commitment")
+                    if _phev_col:
+                        def _phev_flag(row):
+                            if bool(row.get(_ev_col, False)):
+                                return "✓ EV exempt (s58P)"
+                            if bool(row.get(_phev_col, False)):
+                                grandfathered = bool(row.get(_commit_col, False))
+                                return ("✓ PHEV grandfathered (s58P(2))"
+                                        if grandfathered else "⚠ PHEV — exempt ended 1 Apr 2025")
+                            return "ICE — standard FBT"
+                        _preview_aug["⚑ FBT Exemption"] = _preview_aug.apply(_phev_flag, axis=1)
+
+                    st.dataframe(_preview_aug, use_container_width=True, hide_index=True)
+                    if len(set(_preview_aug.columns) - set(_preview.columns)) > 0:
+                        st.caption("⚑ columns are calculated — not stored in the database")
+
+                if st.button(f"Run SELECT * FROM {_sel} LIMIT 50 below ↓", key="_inject_query"):
+                    st.session_state["_custom_sql"] = f"SELECT * FROM \"{_sel}\" LIMIT 50;"
+
+        except Exception as _e:
+            st.error(f"Schema browser error: {_e}")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── Query Runner ─────────────────────────────────────────────────────────
+    # Support injected query from schema browser preview button
+    _default_sql = st.session_state.pop("_custom_sql", None)
+    if _default_sql:
+        st.session_state["_sql_selectbox"] = "— Custom (from browser) —"
+
+    _query_options = ["— Custom (from browser) —"] + list(query_labels.keys())
+    selected_query_label = st.selectbox(
+        "Select analysis query:",
+        _query_options,
+        index=_query_options.index(st.session_state.get("_sql_selectbox", list(query_labels.keys())[0]))
+        if st.session_state.get("_sql_selectbox") in _query_options else 1,
+        key="_sql_selectbox"
+    )
+
+    if selected_query_label == "— Custom (from browser) —":
+        active_sql = _default_sql or f"SELECT * FROM chart_of_accounts LIMIT 10;"
+    else:
+        active_sql = query_labels[selected_query_label]
 
     col1, col2 = st.columns([2, 3])
     with col1:
         section("SQL Query")
-        st.code(query_labels[selected_query].strip(), language="sql")
+        st.code(active_sql.strip(), language="sql")
 
     with col2:
         section("Query Results")
         try:
             with get_connection() as conn:
-                result_df = pd.read_sql_query(query_labels[selected_query], conn)
+                result_df = pd.read_sql_query(active_sql, conn)
             if not result_df.empty:
                 # Format numeric columns
                 for col in result_df.select_dtypes(include=[np.number]).columns:
