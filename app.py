@@ -3663,6 +3663,68 @@ elif page == "About & Governance":
 > and anyone onboarding to the system — no coding knowledge required.
     """)
 
+    # ── How to Use ────────────────────────────────────────────────────────────
+    section("How to Use This Dashboard")
+
+    with st.expander("🗂️  Navigation — switching between modules", expanded=True):
+        st.markdown("""
+Use the **left sidebar** to move between the 11 modules. Click any page name to switch instantly.
+All filters and period selections remain active as you navigate — you don't need to re-select them.
+        """)
+
+    with st.expander("📅  Setting the reporting period", expanded=True):
+        st.markdown("""
+All period controls are in the **sidebar under 📅 Period**:
+
+| Control | What it does |
+|---|---|
+| **View Type** | Monthly = single month · Quarterly = one quarter · YTD = Jul to selected month · Full Year = all 12 months |
+| **Financial Year** | Select the FY (e.g. FY2026 = 1 Jul 2025 – 30 Jun 2026) |
+| **Month / End Month** | Available when View Type is Monthly or YTD — pick the reporting month |
+| **Quarter** | Available when View Type is Quarterly — Q1 Jul–Sep · Q2 Oct–Dec · Q3 Jan–Mar · Q4 Apr–Jun |
+
+The coloured badge at the top of each page always shows the active period at a glance.
+        """)
+
+    with st.expander("🌏  Filtering by Region & Cost Centre", expanded=False):
+        st.markdown("""
+Under **🌏 Filters** in the sidebar:
+- **Region** — Domestic, International, or both
+- **Cost Centre** — select one or more cost centres; deselecting all defaults back to all
+
+These filters apply across Executive Overview, Income Statement, and Balance Sheet.
+        """)
+
+    with st.expander("⚙️  Changing tax rates", expanded=False):
+        st.markdown("""
+Tax rates are **locked by default** to prevent accidental changes.
+
+1. Find **⚙️ Tax Rate Configuration** in the sidebar
+2. Tick the **✏️ checkbox** to unlock edit mode — a warning banner appears
+3. Adjust the rate(s) — every change is automatically recorded with a timestamp in the **Change Log**
+4. Untick ✏️ to lock again
+
+> **Note:** Rate changes apply to the current session only and reset when the app is rebooted.
+        """)
+
+    with st.expander("🔍  Running your own SQL queries", expanded=False):
+        st.markdown("""
+Go to the **SQL Analysis** page. You can:
+- Type any `SELECT` query against the live SQLite database
+- Use the **pre-built queries** dropdown for common analytical questions
+- Browse the **Schema** tab to see all table names, column types, and row counts
+
+Only `SELECT` statements are permitted — the database is read-only from the UI.
+        """)
+
+    with st.expander("🖨️  Exporting data", expanded=False):
+        st.markdown("""
+Every data table in the dashboard has a **Download CSV** button (look for the ⬇ icon on dataframes).
+For formatted reports, use your browser's **Print → Save as PDF** function on any page.
+        """)
+
+    st.markdown("---")
+
     # ── Dashboard Purpose ──────────────────────────────────────────────────────
     section("Dashboard Purpose")
     st.markdown("""
