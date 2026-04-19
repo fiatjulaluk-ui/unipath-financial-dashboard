@@ -1,6 +1,6 @@
 -- ============================================================
--- RMIT UP Financial Analysis – SQL Query Reference
--- Entity:  RMIT UP Pty Ltd  |  FY2026 (Jul 2025 – Jun 2026)
+-- UniPath Financial Analysis – SQL Query Reference
+-- Entity:  UniPath Pty Ltd  |  FY2026 (Jul 2025 – Jun 2026)
 -- Author:  Financial Accountant Candidate
 -- Updated: March 2026
 -- ============================================================

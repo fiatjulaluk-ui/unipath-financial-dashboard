@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-RMIT UP Financial Data Generator
+UniPath Financial Data Generator
 ==================================
-Generates synthetic but realistic financial data for RMIT UP Pty Ltd.
+Generates synthetic but realistic financial data for UniPath Pty Ltd.
 Covers FY2026 (Jul 2025 – Jun 2026), with data through March 2026 (Q3).
 
 Run this script once before launching the Streamlit dashboard:
@@ -60,7 +60,7 @@ TAX_CONFIG = {
     # ── Corporate Income Tax ────────────────────────────────────────────────
     # s66-5 ITAA 1997: standard company rate 30%.
     # Base Rate Entity (BRE) rate 25% applies if aggregated turnover < $50M and
-    # passive income ≤ 80% of assessable income. RMIT UP is a wholly-owned
+    # passive income ≤ 80% of assessable income. UniPath is a wholly-owned
     # subsidiary — aggregated group turnover likely exceeds $50M → 30% applied.
     # Deferred tax (timing differences on depreciation, provisions) is recognised
     # separately; this rate drives the current-period tax provision only.
@@ -122,7 +122,7 @@ ACCOUNTS = [
     ("2202", "FBT Payable",                            "Liability", "Current Liabilities",       "Credit"),
     ("2203", "Income Tax Payable",                     "Liability", "Current Liabilities",       "Credit"),
     ("2300", "Deferred Revenue",                       "Liability", "Current Liabilities",       "Credit"),
-    ("2400", "Intercompany Payable – RMIT University", "Liability", "Current Liabilities",       "Credit"),
+    ("2400", "Intercompany Payable – Parent University", "Liability", "Current Liabilities",       "Credit"),
     ("2500", "Lease Liabilities",                      "Liability", "Non-Current Liabilities",   "Credit"),
     ("3001", "Retained Earnings",                      "Equity",    "Equity",                    "Credit"),
     ("3002", "Current Year Earnings",                  "Equity",    "Equity",                    "Credit"),
@@ -142,7 +142,7 @@ ACCOUNTS = [
     ("5203", "Professional Services",                  "Expense",   "Operating Expenses",        "Debit"),
     ("5204", "Travel & Entertainment",                 "Expense",   "Operating Expenses",        "Debit"),
     ("5205", "FBT Expense",                            "Expense",   "Operating Expenses",        "Debit"),
-    ("5300", "Intercompany Charges – RMIT University", "Expense",   "Intercompany",              "Debit"),
+    ("5300", "Intercompany Charges – Parent University", "Expense",   "Intercompany",              "Debit"),
     ("5400", "Income Tax Expense",                     "Expense",   "Tax",                       "Debit"),
 ]
 
@@ -400,7 +400,7 @@ def gen_general_ledger():
             rows.append({
                 "journal_id": jeid, "period": period, "journal_date": me,
                 "account_code": line[0], "cost_centre": "CC003",
-                "description": "Intercompany charge – RMIT University shared services",
+                "description": "Intercompany charge – Parent University shared services",
                 "debit": line[1], "credit": line[2],
                 "journal_type": "Intercompany", "posted_by": "Finance_Team",
             })
@@ -852,8 +852,8 @@ def gen_intercompany():
             "ic_id":          f"IC{ic_num:04d}",
             "period":         f"{year}-{month:02d}",
             "transaction_date": str(month_end(year, month)),
-            "entity_from":    "RMIT University",
-            "entity_to":      "RMIT UP Pty Ltd",
+            "entity_from":    "Parent University",
+            "entity_to":      "UniPath Pty Ltd",
             "description":    "Shared services recharge – Finance, HR, IT, Legal",
             "amount":         charge,
             "account_dr":     "5300",

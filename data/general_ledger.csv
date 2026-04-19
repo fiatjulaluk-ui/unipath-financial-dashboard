@@ -25,8 +25,8 @@ JE01012,2025-07,2025-07-31,5203,CC003,Professional services – 2025-07,35927.08
 JE01012,2025-07,2025-07-31,2001,CC003,Professional services – 2025-07,0.0,35927.08,Expense,Finance_Team
 JE01013,2025-07,2025-07-31,5204,CC007,Travel & entertainment – 2025-07,12464.6,0.0,Expense,Finance_Team
 JE01013,2025-07,2025-07-31,2001,CC007,Travel & entertainment – 2025-07,0.0,12464.6,Expense,Finance_Team
-JE01014,2025-07,2025-07-31,5300,CC003,Intercompany charge – RMIT University shared services,90817.79,0.0,Intercompany,Finance_Team
-JE01014,2025-07,2025-07-31,2400,CC003,Intercompany charge – RMIT University shared services,0.0,90817.79,Intercompany,Finance_Team
+JE01014,2025-07,2025-07-31,5300,CC003,Intercompany charge – Parent University shared services,90817.79,0.0,Intercompany,Finance_Team
+JE01014,2025-07,2025-07-31,2400,CC003,Intercompany charge – Parent University shared services,0.0,90817.79,Intercompany,Finance_Team
 JE01015,2025-08,2025-08-31,1001,CC001,Revenue recognition – Course Fees – Domestic,544415.91,0.0,Revenue,System
 JE01015,2025-08,2025-08-31,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,544415.91,Revenue,System
 JE01016,2025-08,2025-08-31,1001,CC001,Revenue recognition – Course Fees – International,343210.14,0.0,Revenue,System
@@ -53,8 +53,8 @@ JE01026,2025-08,2025-08-31,5203,CC003,Professional services – 2025-08,23371.64
 JE01026,2025-08,2025-08-31,2001,CC003,Professional services – 2025-08,0.0,23371.64,Expense,Finance_Team
 JE01027,2025-08,2025-08-31,5204,CC007,Travel & entertainment – 2025-08,11375.45,0.0,Expense,Finance_Team
 JE01027,2025-08,2025-08-31,2001,CC007,Travel & entertainment – 2025-08,0.0,11375.45,Expense,Finance_Team
-JE01028,2025-08,2025-08-31,5300,CC003,Intercompany charge – RMIT University shared services,87451.81,0.0,Intercompany,Finance_Team
-JE01028,2025-08,2025-08-31,2400,CC003,Intercompany charge – RMIT University shared services,0.0,87451.81,Intercompany,Finance_Team
+JE01028,2025-08,2025-08-31,5300,CC003,Intercompany charge – Parent University shared services,87451.81,0.0,Intercompany,Finance_Team
+JE01028,2025-08,2025-08-31,2400,CC003,Intercompany charge – Parent University shared services,0.0,87451.81,Intercompany,Finance_Team
 JE01029,2025-09,2025-09-30,1001,CC001,Revenue recognition – Course Fees – Domestic,645835.11,0.0,Revenue,System
 JE01029,2025-09,2025-09-30,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,645835.11,Revenue,System
 JE01030,2025-09,2025-09-30,1001,CC001,Revenue recognition – Course Fees – International,398187.41,0.0,Revenue,System
@@ -81,8 +81,8 @@ JE01040,2025-09,2025-09-30,5203,CC003,Professional services – 2025-09,30144.87
 JE01040,2025-09,2025-09-30,2001,CC003,Professional services – 2025-09,0.0,30144.87,Expense,Finance_Team
 JE01041,2025-09,2025-09-30,5204,CC007,Travel & entertainment – 2025-09,10168.38,0.0,Expense,Finance_Team
 JE01041,2025-09,2025-09-30,2001,CC007,Travel & entertainment – 2025-09,0.0,10168.38,Expense,Finance_Team
-JE01042,2025-09,2025-09-30,5300,CC003,Intercompany charge – RMIT University shared services,89380.06,0.0,Intercompany,Finance_Team
-JE01042,2025-09,2025-09-30,2400,CC003,Intercompany charge – RMIT University shared services,0.0,89380.06,Intercompany,Finance_Team
+JE01042,2025-09,2025-09-30,5300,CC003,Intercompany charge – Parent University shared services,89380.06,0.0,Intercompany,Finance_Team
+JE01042,2025-09,2025-09-30,2400,CC003,Intercompany charge – Parent University shared services,0.0,89380.06,Intercompany,Finance_Team
 JE01043,2025-10,2025-10-31,1001,CC001,Revenue recognition – Course Fees – Domestic,496606.65,0.0,Revenue,System
 JE01043,2025-10,2025-10-31,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,496606.65,Revenue,System
 JE01044,2025-10,2025-10-31,1001,CC001,Revenue recognition – Course Fees – International,285618.51,0.0,Revenue,System
@@ -109,8 +109,8 @@ JE01054,2025-10,2025-10-31,5203,CC003,Professional services – 2025-10,37799.08
 JE01054,2025-10,2025-10-31,2001,CC003,Professional services – 2025-10,0.0,37799.08,Expense,Finance_Team
 JE01055,2025-10,2025-10-31,5204,CC007,Travel & entertainment – 2025-10,13299.9,0.0,Expense,Finance_Team
 JE01055,2025-10,2025-10-31,2001,CC007,Travel & entertainment – 2025-10,0.0,13299.9,Expense,Finance_Team
-JE01056,2025-10,2025-10-31,5300,CC003,Intercompany charge – RMIT University shared services,87392.46,0.0,Intercompany,Finance_Team
-JE01056,2025-10,2025-10-31,2400,CC003,Intercompany charge – RMIT University shared services,0.0,87392.46,Intercompany,Finance_Team
+JE01056,2025-10,2025-10-31,5300,CC003,Intercompany charge – Parent University shared services,87392.46,0.0,Intercompany,Finance_Team
+JE01056,2025-10,2025-10-31,2400,CC003,Intercompany charge – Parent University shared services,0.0,87392.46,Intercompany,Finance_Team
 JE01057,2025-11,2025-11-30,1001,CC001,Revenue recognition – Course Fees – Domestic,416325.36,0.0,Revenue,System
 JE01057,2025-11,2025-11-30,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,416325.36,Revenue,System
 JE01058,2025-11,2025-11-30,1001,CC001,Revenue recognition – Course Fees – International,264652.58,0.0,Revenue,System
@@ -137,8 +137,8 @@ JE01068,2025-11,2025-11-30,5203,CC003,Professional services – 2025-11,46374.8,
 JE01068,2025-11,2025-11-30,2001,CC003,Professional services – 2025-11,0.0,46374.8,Expense,Finance_Team
 JE01069,2025-11,2025-11-30,5204,CC007,Travel & entertainment – 2025-11,13011.39,0.0,Expense,Finance_Team
 JE01069,2025-11,2025-11-30,2001,CC007,Travel & entertainment – 2025-11,0.0,13011.39,Expense,Finance_Team
-JE01070,2025-11,2025-11-30,5300,CC003,Intercompany charge – RMIT University shared services,89179.09,0.0,Intercompany,Finance_Team
-JE01070,2025-11,2025-11-30,2400,CC003,Intercompany charge – RMIT University shared services,0.0,89179.09,Intercompany,Finance_Team
+JE01070,2025-11,2025-11-30,5300,CC003,Intercompany charge – Parent University shared services,89179.09,0.0,Intercompany,Finance_Team
+JE01070,2025-11,2025-11-30,2400,CC003,Intercompany charge – Parent University shared services,0.0,89179.09,Intercompany,Finance_Team
 JE01071,2025-12,2025-12-31,1001,CC001,Revenue recognition – Course Fees – Domestic,371658.62,0.0,Revenue,System
 JE01071,2025-12,2025-12-31,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,371658.62,Revenue,System
 JE01072,2025-12,2025-12-31,1001,CC001,Revenue recognition – Course Fees – International,215119.45,0.0,Revenue,System
@@ -165,8 +165,8 @@ JE01082,2025-12,2025-12-31,5203,CC003,Professional services – 2025-12,40789.06
 JE01082,2025-12,2025-12-31,2001,CC003,Professional services – 2025-12,0.0,40789.06,Expense,Finance_Team
 JE01083,2025-12,2025-12-31,5204,CC007,Travel & entertainment – 2025-12,13161.56,0.0,Expense,Finance_Team
 JE01083,2025-12,2025-12-31,2001,CC007,Travel & entertainment – 2025-12,0.0,13161.56,Expense,Finance_Team
-JE01084,2025-12,2025-12-31,5300,CC003,Intercompany charge – RMIT University shared services,96607.04,0.0,Intercompany,Finance_Team
-JE01084,2025-12,2025-12-31,2400,CC003,Intercompany charge – RMIT University shared services,0.0,96607.04,Intercompany,Finance_Team
+JE01084,2025-12,2025-12-31,5300,CC003,Intercompany charge – Parent University shared services,96607.04,0.0,Intercompany,Finance_Team
+JE01084,2025-12,2025-12-31,2400,CC003,Intercompany charge – Parent University shared services,0.0,96607.04,Intercompany,Finance_Team
 JE01085,2026-01,2026-01-31,1001,CC001,Revenue recognition – Course Fees – Domestic,543499.19,0.0,Revenue,System
 JE01085,2026-01,2026-01-31,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,543499.19,Revenue,System
 JE01086,2026-01,2026-01-31,1001,CC001,Revenue recognition – Course Fees – International,328811.93,0.0,Revenue,System
@@ -193,8 +193,8 @@ JE01096,2026-01,2026-01-31,5203,CC003,Professional services – 2026-01,32650.74
 JE01096,2026-01,2026-01-31,2001,CC003,Professional services – 2026-01,0.0,32650.74,Expense,Finance_Team
 JE01097,2026-01,2026-01-31,5204,CC007,Travel & entertainment – 2026-01,8317.43,0.0,Expense,Finance_Team
 JE01097,2026-01,2026-01-31,2001,CC007,Travel & entertainment – 2026-01,0.0,8317.43,Expense,Finance_Team
-JE01098,2026-01,2026-01-31,5300,CC003,Intercompany charge – RMIT University shared services,79587.61,0.0,Intercompany,Finance_Team
-JE01098,2026-01,2026-01-31,2400,CC003,Intercompany charge – RMIT University shared services,0.0,79587.61,Intercompany,Finance_Team
+JE01098,2026-01,2026-01-31,5300,CC003,Intercompany charge – Parent University shared services,79587.61,0.0,Intercompany,Finance_Team
+JE01098,2026-01,2026-01-31,2400,CC003,Intercompany charge – Parent University shared services,0.0,79587.61,Intercompany,Finance_Team
 JE01099,2026-02,2026-02-28,1001,CC001,Revenue recognition – Course Fees – Domestic,465806.59,0.0,Revenue,System
 JE01099,2026-02,2026-02-28,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,465806.59,Revenue,System
 JE01100,2026-02,2026-02-28,1001,CC001,Revenue recognition – Course Fees – International,318315.22,0.0,Revenue,System
@@ -221,8 +221,8 @@ JE01110,2026-02,2026-02-28,5203,CC003,Professional services – 2026-02,26912.45
 JE01110,2026-02,2026-02-28,2001,CC003,Professional services – 2026-02,0.0,26912.45,Expense,Finance_Team
 JE01111,2026-02,2026-02-28,5204,CC007,Travel & entertainment – 2026-02,13806.77,0.0,Expense,Finance_Team
 JE01111,2026-02,2026-02-28,2001,CC007,Travel & entertainment – 2026-02,0.0,13806.77,Expense,Finance_Team
-JE01112,2026-02,2026-02-28,5300,CC003,Intercompany charge – RMIT University shared services,86905.24,0.0,Intercompany,Finance_Team
-JE01112,2026-02,2026-02-28,2400,CC003,Intercompany charge – RMIT University shared services,0.0,86905.24,Intercompany,Finance_Team
+JE01112,2026-02,2026-02-28,5300,CC003,Intercompany charge – Parent University shared services,86905.24,0.0,Intercompany,Finance_Team
+JE01112,2026-02,2026-02-28,2400,CC003,Intercompany charge – Parent University shared services,0.0,86905.24,Intercompany,Finance_Team
 JE01113,2026-03,2026-03-31,1001,CC001,Revenue recognition – Course Fees – Domestic,606673.54,0.0,Revenue,System
 JE01113,2026-03,2026-03-31,4001,CC001,Revenue recognition – Course Fees – Domestic,0.0,606673.54,Revenue,System
 JE01114,2026-03,2026-03-31,1001,CC001,Revenue recognition – Course Fees – International,371401.87,0.0,Revenue,System
@@ -249,8 +249,8 @@ JE01124,2026-03,2026-03-31,5203,CC003,Professional services – 2026-03,46386.57
 JE01124,2026-03,2026-03-31,2001,CC003,Professional services – 2026-03,0.0,46386.57,Expense,Finance_Team
 JE01125,2026-03,2026-03-31,5204,CC007,Travel & entertainment – 2026-03,13632.75,0.0,Expense,Finance_Team
 JE01125,2026-03,2026-03-31,2001,CC007,Travel & entertainment – 2026-03,0.0,13632.75,Expense,Finance_Team
-JE01126,2026-03,2026-03-31,5300,CC003,Intercompany charge – RMIT University shared services,88444.42,0.0,Intercompany,Finance_Team
-JE01126,2026-03,2026-03-31,2400,CC003,Intercompany charge – RMIT University shared services,0.0,88444.42,Intercompany,Finance_Team
+JE01126,2026-03,2026-03-31,5300,CC003,Intercompany charge – Parent University shared services,88444.42,0.0,Intercompany,Finance_Team
+JE01126,2026-03,2026-03-31,2400,CC003,Intercompany charge – Parent University shared services,0.0,88444.42,Intercompany,Finance_Team
 JE09001,2026-03,2026-03-31,5205,CC003,FBT accrual FY2026 – BEV – Tesla Model 3 Long Range – s58P exempt: taxable value $0,0.0,0.0,FBT_Accrual,Finance_Team
 JE09001,2026-03,2026-03-31,5205,CC003,"FBT accrual FY2026 – ICE Fleet Car – Toyota Camry Hybrid – taxable value $8,968.77 × Type 1 × 47%",8768.71,0.0,FBT_Accrual,Finance_Team
 JE09001,2026-03,2026-03-31,5205,CC003,"FBT accrual FY2026 – Entertainment – Meals & Events – taxable value $14,800.00 × Type 2 × 47%",13124.58,0.0,FBT_Accrual,Finance_Team

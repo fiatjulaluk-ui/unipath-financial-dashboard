@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-RMIT UP | Financial Accounting Dashboard
+UniPath | Financial Accounting Dashboard
 =========================================
 Streamlit application showcasing financial accounting competencies
-aligned with the Financial Accountant role at RMIT UP.
+aligned with the Financial Accountant role at UniPath.
 
 Run:
     streamlit run app.py
@@ -39,11 +39,11 @@ CHART_PALETTE = [RMIT_RED, BLUE, GREEN, ORANGE, TEAL, RMIT_GREY, "#9B59B6"]
 
 CURRENT_PERIOD = "2026-03"   # fallback constant — sidebar overrides this via selected_period
 REPORT_DATE    = "31 March 2026"
-ENTITY         = "RMIT UP Pty Ltd"
+ENTITY         = "UniPath Pty Ltd"
 ABN            = "12 345 678 901"
 
 st.set_page_config(
-    page_title="RMIT UP | Financial Dashboard",
+    page_title="UniPath | Financial Dashboard",
     page_icon="🔴",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -198,14 +198,14 @@ def fmt_pct(val):
 # ─────────────────────────────────────────────────────────────────────────────
 
 with st.sidebar:
-    # RMIT branding header
+    # UniPath branding header
     st.markdown("""
     <div style="text-align:center; padding: 0.5rem 0 1rem;">
         <div style="background:#E8192C; display:inline-block; padding:6px 18px;
                     border-radius:6px; margin-bottom:8px;">
-            <span style="color:white; font-size:1.6rem; font-weight:900; letter-spacing:2px;">RMIT</span>
+            <span style="color:white; font-size:1.6rem; font-weight:900; letter-spacing:2px;">UniPath</span>
         </div>
-        <div style="color:#AAAAAA; font-size:0.75rem; letter-spacing:0.1em;">UNIVERSITY PROGRAMS</div>
+        <div style="color:#AAAAAA; font-size:0.75rem; letter-spacing:0.1em;">FINANCIAL DASHBOARD</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -804,7 +804,7 @@ if page == "Executive Overview":
         exp_by_acct = exp_data.groupby("account_code")["debit"].sum().reset_index()
         exp_by_acct = exp_by_acct.merge(coa, on="account_code")
         exp_by_acct = exp_by_acct.sort_values("debit", ascending=True)
-        exp_by_acct["short_name"] = exp_by_acct["account_name"].str.replace(" – RMIT University","").str.replace("Depreciation – ","Dep – ")
+        exp_by_acct["short_name"] = exp_by_acct["account_name"].str.replace(" – Parent University","").str.replace("Depreciation – ","Dep – ")
         fig3 = px.bar(exp_by_acct, x="debit", y="short_name", orientation="h",
                       color_discrete_sequence=[RMIT_RED])
         fig3.update_layout(
@@ -1312,7 +1312,7 @@ elif page == "Balance Sheet":
             ("FBT Payable  (2202 — due 21 May 2026)",  round(fbt_pay, 0),  False),
             ("Income Tax Payable  (2203 — s66-5 ITAA)", round(tax_pay, 0),  False),
             ("Deferred Revenue",                   round(def_rev, 0),  False),
-            ("Intercompany Payable – RMIT Univ.",  round(ic_pay, 0),   False),
+            ("Intercompany Payable – Parent Univ.",  round(ic_pay, 0),   False),
             ("Total Current Liabilities",
              round(ap+accruals+gst_pay+ptax_pay+fbt_pay+tax_pay+def_rev+ic_pay, 0), True),
         ]), unsafe_allow_html=True)
@@ -1853,7 +1853,7 @@ Weighting by invoice value ensures large invoices influence the result proportio
 
 **Days to Pay** = Payment Date − Invoice Date (calendar days).
 
-**Why 35 days?** RMIT UP's standard payment terms are Net-30. The 35-day target adds a 5-day processing buffer for approval workflows. Staying below 35 days keeps supplier relationships healthy and avoids late-payment penalties under the *Payment Terms Policy (VGPB 2022)*.
+**Why 35 days?** UniPath's standard payment terms are Net-30. The 35-day target adds a 5-day processing buffer for approval workflows. Staying below 35 days keeps supplier relationships healthy and avoids late-payment penalties under the *Payment Terms Policy (VGPB 2022)*.
 
 **Limitation:** DPO only reflects *paid* invoices in the selected period. Unpaid/overdue invoices are excluded from the DPO metric — monitor the Aging Schedule above for those.
         """)
@@ -3033,7 +3033,7 @@ elif page == "Tax Compliance":
 
         stp_export = pd.DataFrame({
             "fbt_year":              stp_rows["fbt_year"],
-            "employer_abn":          "12 345 678 901",       # RMIT UP Pty Ltd ABN (synthetic)
+            "employer_abn":          "12 345 678 901",       # UniPath Pty Ltd ABN (synthetic)
             "payee_id":              stp_rows["employee_id"],
             "payee_name":            stp_rows["employee_name"],
             "tfn_masked":            stp_rows["employee_tfn_masked"],
@@ -3117,7 +3117,7 @@ elif page == "Tax Compliance":
             st.download_button(
                 label="⬇ Download STP Phase 2 CSV",
                 data=csv_bytes,
-                file_name="RMIT_UP_STP_Phase2_RFBA_FY2026.csv",
+                file_name="UniPath_STP_Phase2_RFBA_FY2026.csv",
                 mime="text/csv",
                 help="ATO STP Phase 2 submission file — RFBA reportable rows only",
                 use_container_width=True,
@@ -3126,7 +3126,7 @@ elif page == "Tax Compliance":
             st.download_button(
                 label="⬇ Download FBT Workbook (XLSX)",
                 data=xlsx_bytes,
-                file_name="RMIT_UP_FBT_Compliance_FY2026.xlsx",
+                file_name="UniPath_FBT_Compliance_FY2026.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 help="5 tabs: STP export · FBT Register · Reconciliation · Payment Schedule · TAX_CONFIG",
                 use_container_width=True,
@@ -3323,7 +3323,7 @@ GROUP BY g.quarter_label, g.gst_collected, g.gst_itc, g.net_gst;
 """,
         "Intercompany Reconciliation": """
 -- Intercompany Balance Reconciliation
--- Ensures IC payable to RMIT University matches charges posted
+-- Ensures IC payable to Parent University matches charges posted
 SELECT
     ic.period,
     ic.description,
@@ -3728,13 +3728,13 @@ For formatted reports, use your browser's **Print → Save as PDF** function on 
     # ── Dashboard Purpose ──────────────────────────────────────────────────────
     section("Dashboard Purpose")
     st.markdown("""
-This dashboard is a **Financial Management & Compliance Tool** for RMIT University Programs (RMIT UP).
+This dashboard is a **Financial Management & Compliance Tool** for UniPath Pty Ltd.
 It consolidates general ledger data, sub-ledger transactions, tax obligations, and month-end
 controls into a single platform — replacing manual Excel-based reporting.
 
 **Primary users:** Financial Accountant, Finance Manager, CFO, Internal Audit
 **Reporting period:** FY2026 (1 July 2025 – 30 June 2026)
-**Data source:** Synthetic dataset generated from RMIT UP's chart of accounts and operational parameters
+**Data source:** Synthetic dataset generated from UniPath's chart of accounts and operational parameters
 **Refresh cycle:** On-demand (database rebuilt on app startup if schema changes are detected)
     """)
 

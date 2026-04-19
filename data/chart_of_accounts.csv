@@ -18,7 +18,7 @@ account_code,account_name,account_type,report_section,normal_balance,is_active
 2202,FBT Payable,Liability,Current Liabilities,Credit,1
 2203,Income Tax Payable,Liability,Current Liabilities,Credit,1
 2300,Deferred Revenue,Liability,Current Liabilities,Credit,1
-2400,Intercompany Payable – RMIT University,Liability,Current Liabilities,Credit,1
+2400,Intercompany Payable – Parent University,Liability,Current Liabilities,Credit,1
 2500,Lease Liabilities,Liability,Non-Current Liabilities,Credit,1
 3001,Retained Earnings,Equity,Equity,Credit,1
 3002,Current Year Earnings,Equity,Equity,Credit,1
@@ -38,5 +38,5 @@ account_code,account_name,account_type,report_section,normal_balance,is_active
 5203,Professional Services,Expense,Operating Expenses,Debit,1
 5204,Travel & Entertainment,Expense,Operating Expenses,Debit,1
 5205,FBT Expense,Expense,Operating Expenses,Debit,1
-5300,Intercompany Charges – RMIT University,Expense,Intercompany,Debit,1
+5300,Intercompany Charges – Parent University,Expense,Intercompany,Debit,1
 5400,Income Tax Expense,Expense,Tax,Debit,1
