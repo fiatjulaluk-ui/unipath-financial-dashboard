@@ -1,0 +1,5 @@
+fbt_year,asset_id,description,fuel_type,gross_up_type,purchase_price,fuel_consumption,first_use_date,binding_commitment_date,phev_grandfathered,years_held,lct_threshold,lct_payable,base_val_pre_disc,discount_applies,base_val_final,private_days,taxable_value,bev_exempt,fbt_payable,rfba_amount,rfba_reportable,compliance_chk,employee_id,employee_name,employee_tfn_masked
+2026,VEH-001,BEV – Tesla Model 3 Long Range,BEV,Type 1,68500,0.0,2023-09-01,N/A,False,1.58,91387,0.0,68500.0,False,68500.0,310,11635.62,True,0.0,21954.09,True,True,EMP-0042,J. Anderson,XXX-XXX-042
+2026,VEH-002,ICE Fleet Car – Toyota Camry Hybrid,ICE,Type 1,52800,8.2,2023-07-01,N/A,False,1.75,80567,0.0,52800.0,False,52800.0,310,8968.77,False,8768.71,18656.84,True,True,EMP-0017,M. Tran,XXX-XXX-017
+2026,VEH-003,Entertainment – Meals & Events,N/A,Type 2,0,0.0,N/A,N/A,False,0.0,91387,0.0,0.0,False,0.0,0,14800.0,False,13124.58,27924.64,True,True,POOL,Pooled – Staff,N/A
+2026,VEH-004,Expense Payments – Reimbursements,N/A,Type 2,0,0.0,N/A,N/A,False,0.0,91387,0.0,0.0,False,0.0,0,8320.0,False,7378.14,15698.18,True,True,POOL,Pooled – Staff,N/A

@@ -3,6 +3,13 @@ SGC_RATE,Superannuation Guarantee Rate,Payroll,0.12,1 Jul 2025 — 12%
 VIC_PAYROLL_TAX_RATE,Victorian Payroll Tax Rate,Payroll,0.0485,Ongoing
 VIC_PAYROLL_TAX_THRESHOLD_ANN,Victorian Payroll Tax Annual Threshold,Payroll,1000000.0,1 Jul 2025 — increased to $1M
 GST_RATE,Goods & Services Tax Rate,GST,0.1,Ongoing
-FBT_GROSS_UP_TYPE1,FBT Gross-Up Rate – Type 1 Benefits,FBT,2.0802,FY2026
-FBT_GROSS_UP_TYPE2,FBT Gross-Up Rate – Type 2 Benefits,FBT,1.8868,FY2026
-FBT_RATE,Fringe Benefits Tax Rate,FBT,0.47,FY2026
+INDIVIDUAL_TOP_RATE,Top Marginal Income Tax Rate (s12-5 ITAA 1997),FBT,0.45,FY2026
+MEDICARE_LEVY,Medicare Levy Rate (s8 Medicare Levy Act 1986),FBT,0.02,FY2026
+FBT_RATE,FBT Rate = Top Marginal + Medicare Levy (s5 FBTAA 1986),FBT,0.47000000000000003,FY2026 — derived
+FBT_GROSS_UP_TYPE1,FBT Type 1 Gross-Up — ATO published FY2026,FBT,2.0802,FY2026 — ATO authoritative
+FBT_GROSS_UP_TYPE2,FBT Type 2 Gross-Up = 1/(1-FBT),FBT,1.8868,FY2026 — derived
+EV_HOME_CHARGING_C_PER_KM,EV Home Charging Rate (Operating Cost Method),FBT-EV,4.2,PCG 2024/2 — FY2026; FY2027 draft 5.47c
+LCT_THRESHOLD_ICE,LCT Threshold — Standard Vehicles,LCT,80567.0,1 Jul 2025 — indexed annually
+LCT_THRESHOLD_FEV,LCT Threshold — Fuel-Efficient Vehicles (≤3.5L/100km),LCT,91387.0,1 Jul 2025 — indexed annually
+LCT_RATE,Luxury Car Tax Rate (s9 LCTA 1999),LCT,0.33,Ongoing — not indexed
+CORP_TAX_RATE,Corporate Income Tax Rate (s66-5 ITAA 1997),Corp Tax,0.3,30% — standard rate (BRE 25% not applicable)

@@ -1,0 +1,8 @@
+journal_id,period,journal_date,account_code,cost_centre,description,debit,credit,journal_type,posted_by,line_no,sub_ledger_ref,sub_ledger_table,status,due_date,legislative_ref
+JE09001,2026-03,2026-03-31,5205,CC003,FBT accrual FY2026 – BEV – Tesla Model 3 Long Range – s58P exempt: taxable value $0,0.0,0.0,FBT_Accrual,Finance_Team,1,VEH-001,fbt_register,Posted,2026-05-21,s5 FBTAA 1986
+JE09001,2026-03,2026-03-31,5205,CC003,"FBT accrual FY2026 – ICE Fleet Car – Toyota Camry Hybrid – taxable value $8,968.77 × Type 1 × 47%",8768.71,0.0,FBT_Accrual,Finance_Team,2,VEH-002,fbt_register,Posted,2026-05-21,s5 FBTAA 1986
+JE09001,2026-03,2026-03-31,5205,CC003,"FBT accrual FY2026 – Entertainment – Meals & Events – taxable value $14,800.00 × Type 2 × 47%",13124.58,0.0,FBT_Accrual,Finance_Team,3,VEH-003,fbt_register,Posted,2026-05-21,s5 FBTAA 1986
+JE09001,2026-03,2026-03-31,5205,CC003,"FBT accrual FY2026 – Expense Payments – Reimbursements – taxable value $8,320.00 × Type 2 × 47%",7378.14,0.0,FBT_Accrual,Finance_Team,4,VEH-004,fbt_register,Posted,2026-05-21,s5 FBTAA 1986
+JE09001,2026-03,2026-03-31,2202,CC003,"FBT Payable accrual FY2026 — total $29,271.43 | Due 21 May 2026",0.0,29271.43,FBT_Accrual,Finance_Team,5,ALL,fbt_register,Posted,2026-05-21,s5 FBTAA 1986
+JE09002,2026-05,2026-05-21,2202,CC003,"ATO FBT payment FY2026 — $29,271.43 | Lodge via Tax Agent Portal",29271.43,0.0,FBT_Payment,Finance_Team,1,ALL,fbt_register,Pending,2026-05-21,s69 FBTAA 1986
+JE09002,2026-05,2026-05-21,1002,CC003,"ATO FBT payment FY2026 — $29,271.43 | Lodge via Tax Agent Portal",0.0,29271.43,FBT_Payment,Finance_Team,2,ALL,fbt_register,Pending,2026-05-21,s69 FBTAA 1986

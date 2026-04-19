@@ -1,0 +1,7 @@
+supply_type_code,description,applies_to,gst_rate,gst_rate_pct,bas_field,itc_claimable,legislative_ref
+TAXABLE,Taxable Supply,AR,0.1,10.0,G1,0,s9-5 GSTA 1999
+EXPORT,GST-Free Export,AR,0.0,0.0,G3,0,s38-185 GSTA 1999
+GST_FREE_SALE,GST-Free Domestic Supply,AR,0.0,0.0,G3,0,s38-1 GSTA 1999
+TAXABLE_PURCH,Creditable Acquisition,AP,0.1,10.0,G10,1,s11-5 GSTA 1999
+GST_FREE_PURCH,GST-Free Acquisition,AP,0.0,0.0,G14,0,s38-1 GSTA 1999
+INPUT_TAXED,Input-Taxed Acquisition,AP,0.0,0.0,G15,0,s11-15 GSTA 1999

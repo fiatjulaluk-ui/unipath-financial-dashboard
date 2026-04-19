@@ -1,0 +1,16 @@
+supplier_id,supplier_name,supplier_type,payment_terms_days,expense_account,cost_centre
+SUPP001,Microsoft Australia,Technology,60,5201,CC004
+SUPP002,CBRE Group,Facilities,30,5200,CC006
+SUPP003,PwC Australia,Professional Svcs,30,5203,CC003
+SUPP004,Telstra Enterprise,Technology,30,5201,CC004
+SUPP005,ISS Facility Services,Facilities,30,5200,CC006
+SUPP006,Ogilvy Australia,Marketing,45,5202,CC005
+SUPP007,Herbert Smith Freehills,Professional Svcs,30,5203,CC003
+SUPP008,Johnson Controls,Facilities,30,5200,CC006
+SUPP009,Oracle Corporation,Technology,60,5201,CC004
+SUPP010,KPMG Australia,Professional Svcs,30,5203,CC003
+SUPP011,AGL Energy,Utilities,30,5200,CC006
+SUPP012,DXC Technology,Technology,45,5201,CC004
+SUPP013,Minter Ellison,Professional Svcs,30,5203,CC003
+SUPP014,Salesforce Australia,Technology,30,5201,CC004
+SUPP015,JLL Australia,Facilities,45,5200,CC006

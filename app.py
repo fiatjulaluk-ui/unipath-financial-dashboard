@@ -221,6 +221,7 @@ with st.sidebar:
         "Fixed Assets",
         "Tax Compliance",
         "SQL Analysis",
+        "About & Governance",
     ]
     page = st.radio("Navigation", pages, label_visibility="collapsed")
 
@@ -259,41 +260,59 @@ with st.sidebar:
                 if any(_all_periods[0] <= p <= _all_periods[-1]
                        for p in [v[0], v[1]])}
 
-    # ── Session-state defaults (widgets live on Executive Overview page) ───────
+    # ── Period Controls ───────────────────────────────────────────────────
+    st.markdown('<div style="font-size:0.72rem;color:#aaa;margin:0.4rem 0 0.2rem;font-weight:700">📅 Period</div>', unsafe_allow_html=True)
+
     if "view_type"   not in st.session_state: st.session_state.view_type   = "YTD"
     if "sel_fy"      not in st.session_state: st.session_state.sel_fy      = _fy_years[-1]
     if "sel_month"   not in st.session_state: st.session_state.sel_month   = int(_all_periods[-1][5:7])
     if "sel_quarter" not in st.session_state: st.session_state.sel_quarter = None
 
-    # Compute period_start / period_end from session_state
-    _fy        = st.session_state.sel_fy
+    view_type = st.radio(
+        "View Type", ["Monthly", "Quarterly", "YTD", "Full Year"],
+        index=["Monthly","Quarterly","YTD","Full Year"].index(st.session_state.view_type),
+        horizontal=True, key="sb_view_type",
+    )
+    st.session_state.view_type = view_type
+
+    sel_fy = st.selectbox("Financial Year", _fy_years,
+        index=_fy_years.index(st.session_state.sel_fy) if st.session_state.sel_fy in _fy_years else len(_fy_years)-1,
+        key="sb_sel_fy",
+    )
+    st.session_state.sel_fy = sel_fy
+
+    _fy        = sel_fy
     _fy_start, _fy_end_raw = _fy_bounds(_fy)
-    _fy_end    = min(_fy_end_raw, _all_periods[-1])   # clamp to available data
-    _view      = st.session_state.view_type
+    _fy_end    = min(_fy_end_raw, _all_periods[-1])
 
-    if _view == "Monthly":
-        _mo = st.session_state.sel_month
-        _yr_for_mo = int(_fy[2:]) - 1 if _mo >= 7 else int(_fy[2:])
-        period_end   = f"{_yr_for_mo}-{_mo:02d}"
-        period_start = period_end
-    elif _view == "Quarterly":
-        _qs = _fy_quarters(_fy)
-        _qk = st.session_state.sel_quarter
-        if _qk not in _qs: _qk = list(_qs.keys())[-1]
-        period_start, period_end = _qs[_qk]
-    elif _view == "Full Year":
+    if view_type in ("Monthly", "YTD"):
+        _fy_mo_periods = [p for p in _all_periods if _fy_start <= p <= _fy_end]
+        _mo_options    = [f"{_cal.month_name[int(p[5:7])]} {p[:4]}" for p in _fy_mo_periods]
+        _cur_mo_str    = f"{st.session_state.sel_month:02d}"
+        _cur_mo_matches= [i for i,p in enumerate(_fy_mo_periods) if p[5:7] == _cur_mo_str]
+        _mo_def_idx    = _cur_mo_matches[-1] if _cur_mo_matches else len(_mo_options)-1
+        _col_lbl = "End Month" if view_type == "YTD" else "Month"
+        sel_mo_label  = st.selectbox(_col_lbl, _mo_options, index=_mo_def_idx, key="sb_sel_month")
+        sel_mo_period = _fy_mo_periods[_mo_options.index(sel_mo_label)]
+        st.session_state.sel_month = int(sel_mo_period[5:7])
+        period_end   = sel_mo_period
+        period_start = _fy_start if view_type == "YTD" else sel_mo_period
+
+    elif view_type == "Quarterly":
+        _qs     = _fy_quarters(sel_fy)
+        _q_keys = list(_qs.keys())
+        _cur_q  = st.session_state.sel_quarter
+        _q_idx  = _q_keys.index(_cur_q) if _cur_q in _q_keys else len(_q_keys)-1
+        sel_q   = st.selectbox("Quarter", _q_keys, index=_q_idx, key="sb_sel_quarter")
+        st.session_state.sel_quarter = sel_q
+        period_start, period_end = _qs[sel_q]
+
+    else:  # Full Year
         period_start, period_end = _fy_start, _fy_end
-    else:  # YTD (default)
-        _mo = st.session_state.sel_month
-        _yr_for_mo = int(_fy[2:]) - 1 if _mo >= 7 else int(_fy[2:])
-        period_end   = f"{_yr_for_mo}-{_mo:02d}"
-        period_start = _fy_start
 
-    # Clamp both bounds to available data
     period_start = max(period_start, _all_periods[0])
     period_end   = min(period_end,   _all_periods[-1])
 
-    # Derived display helpers
     _pe_yr, _pe_mo  = map(int, period_end.split("-"))
     _ps_yr, _ps_mo  = map(int, period_start.split("-"))
     REPORT_DATE_DYN = f"{_cal.monthrange(_pe_yr,_pe_mo)[1]} {_cal.month_name[_pe_mo]} {_pe_yr}"
@@ -302,16 +321,12 @@ with st.sidebar:
         "Quarterly": st.session_state.get("sel_quarter","") or "",
         "YTD":       f"Jul {_ps_yr} – {_cal.month_name[_pe_mo]} {_pe_yr}",
         "Full Year": f"Full Year {_fy}",
-    }.get(_view, REPORT_DATE_DYN)
+    }.get(view_type, REPORT_DATE_DYN)
 
-    # MoM (previous period to period_end)
     _pe_idx     = _all_periods.index(period_end) if period_end in _all_periods else len(_all_periods)-1
     prev_period = _all_periods[_pe_idx - 1] if _pe_idx > 0 else period_end
-    selected_period = period_end   # backward-compat alias used in non-Exec pages
+    selected_period = period_end
 
-    # Global aliases used across ALL pages (not just Exec Overview)
-    view_type = _view
-    sel_fy    = _fy
     _kpi_lbl  = {"Monthly": "Month", "Quarterly": "Quarter", "YTD": "YTD", "Full Year": "FY"}.get(view_type, "Period")
     _pl_period_note = {
         "Monthly":   f"for {_cal.month_name[_pe_mo]} {_pe_yr}",
@@ -320,25 +335,42 @@ with st.sidebar:
         "Full Year": f"Full Year {sel_fy}",
     }.get(view_type, period_label)
 
-    # Sidebar info (read-only display)
-    st.markdown(f"""
-    <div style="font-size:0.73rem;color:#999;margin-bottom:0.4rem">
-        <b style="color:#ccc;">{ENTITY}</b><br>
-        ABN {ABN}<br>
-        <b style="color:#E8192C">{view_type}</b>: {period_label}<br>
-        As at: {REPORT_DATE_DYN}
-    </div>""", unsafe_allow_html=True)
+    _badge_clr = {"Monthly":"#005EA5","Quarterly":"#F7941D","YTD":"#E8192C","Full Year":"#00875A"}[view_type]
+    st.markdown(
+        f'<div style="margin-top:0.3rem;font-size:0.71rem;color:#999">'
+        f'<b style="color:#ccc">{ENTITY}</b>  ·  ABN {ABN}<br>'
+        f'<span style="background:{_badge_clr};color:white;padding:1px 7px;border-radius:10px;'
+        f'font-size:0.69rem;font-weight:700">{view_type}</span>'
+        f' &nbsp;{period_label}</div>',
+        unsafe_allow_html=True
+    )
 
     st.markdown("---")
 
-    # Region & Cost Centre — defaults (widgets on Exec Overview page)
+    # ── Global Filters — visible on every page ────────────────────────────
+    st.markdown('<div style="font-size:0.72rem;color:#aaa;margin:0.4rem 0 0.2rem;font-weight:700">🌏 Filters</div>', unsafe_allow_html=True)
     _all_cc = query("SELECT cost_centre_code, cost_centre_name FROM cost_centres ORDER BY cost_centre_code")
     _cc_map = dict(zip(_all_cc["cost_centre_name"], _all_cc["cost_centre_code"]))
-    selected_regions  = ["Domestic", "International"]
-    selected_cc_names = list(_cc_map.keys())
-    selected_cc_codes = list(_cc_map.values())
+    _cc_names_all = list(_cc_map.keys())
 
-    # ── Scenario Slicer ──
+    selected_regions = st.multiselect(
+        "Region", ["Domestic", "International"],
+        default=["Domestic", "International"],
+        key="filter_regions",
+    )
+    if not selected_regions:
+        selected_regions = ["Domestic", "International"]
+
+    selected_cc_names = st.multiselect(
+        "Cost Centre", _cc_names_all,
+        default=_cc_names_all,
+        key="filter_cc",
+    )
+    if not selected_cc_names:
+        selected_cc_names = _cc_names_all
+    selected_cc_codes = [_cc_map[n] for n in selected_cc_names]
+
+    # ── Scenario ─────────────────────────────────────────────────────────
     st.markdown('<div style="font-size:0.72rem;color:#aaa;margin:0.6rem 0 0.3rem;font-weight:700">📊 Scenario</div>', unsafe_allow_html=True)
     show_budget = st.toggle("Overlay Budget Targets", value=False,
                             help="Adds budget lines to Revenue vs Expenses chart.")
@@ -346,30 +378,73 @@ with st.sidebar:
                                   help="Highlight customers exceeding this DSO threshold.")
 
     st.markdown("---")
-    st.markdown('<div style="font-size:0.78rem;color:#ccc;font-weight:700;margin-bottom:0.4rem">⚙️ Tax Rate Configuration</div>', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:0.70rem;color:#888;margin-bottom:0.6rem">Live inputs — updates FBT & payroll calculations instantly</div>', unsafe_allow_html=True)
 
-    sgc_rate = st.number_input(
-        "SGC Rate (%)", value=12.0, min_value=0.0, max_value=20.0, step=0.25, format="%.2f"
-    ) / 100
+    # ── Tax Rate Configuration (read-only by default) ─────────────────────
+    _tc_col, _lock_col = st.columns([4, 1])
+    with _tc_col:
+        st.markdown('<div style="font-size:0.78rem;color:#ccc;font-weight:700">⚙️ Tax Rate Configuration</div>', unsafe_allow_html=True)
+    with _lock_col:
+        st.checkbox("✏️", value=False, key="tax_edit_mode",
+                    help="Unlock to edit tax rates — all changes are logged")
 
-    vic_ptax_rate = st.number_input(
-        "VIC Payroll Tax Rate (%)", value=4.85, min_value=0.0, max_value=10.0, step=0.01, format="%.2f"
-    ) / 100
+    _rate_defs = {"tax_sgc": 12.0, "tax_ptax": 4.85, "tax_top": 45.0, "tax_med": 2.0, "tax_gst_fbt": 10.0}
+    for _k, _v in _rate_defs.items():
+        if _k not in st.session_state:
+            st.session_state[_k] = _v
+    if "tax_change_log" not in st.session_state:
+        st.session_state["tax_change_log"] = []
 
-    # FBT rate components — gross-up rates are derived, not hardcoded
-    indiv_top_rate = st.number_input(
-        "Top Marginal Rate (%)", value=45.0, min_value=30.0, max_value=55.0, step=0.5, format="%.1f",
-        help="s12-5 ITAA 1997 — currently 45% on income > $190,000"
-    ) / 100
-    medicare_levy = st.number_input(
-        "Medicare Levy (%)", value=2.0, min_value=0.0, max_value=5.0, step=0.5, format="%.1f",
-        help="s8 Medicare Levy Act 1986 — currently 2%"
-    ) / 100
-    gst_rate_fbt = st.number_input(
-        "GST Rate (%) – for gross-up", value=10.0, min_value=0.0, max_value=20.0, step=0.5, format="%.1f",
-        help="Used in Type 1 gross-up formula. Normally 10% (GSTA 1999)."
-    ) / 100
+    if not st.session_state.get("tax_edit_mode", False):
+        # ── Read-only display ─────────────────────────────────────────────
+        st.markdown(
+            f'<div style="font-size:0.70rem;color:#888;line-height:1.9;margin-top:0.3rem">'
+            f'SGC Rate: <b style="color:#ccc">{st.session_state.tax_sgc:.2f}%</b><br>'
+            f'Payroll Tax (VIC): <b style="color:#ccc">{st.session_state.tax_ptax:.2f}%</b><br>'
+            f'Top Marginal Rate: <b style="color:#ccc">{st.session_state.tax_top:.1f}%</b><br>'
+            f'Medicare Levy: <b style="color:#ccc">{st.session_state.tax_med:.1f}%</b><br>'
+            f'GST Rate (gross-up): <b style="color:#ccc">{st.session_state.tax_gst_fbt:.1f}%</b>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+        sgc_rate       = st.session_state.tax_sgc / 100
+        vic_ptax_rate  = st.session_state.tax_ptax / 100
+        indiv_top_rate = st.session_state.tax_top / 100
+        medicare_levy  = st.session_state.tax_med / 100
+        gst_rate_fbt   = st.session_state.tax_gst_fbt / 100
+    else:
+        # ── Edit mode ─────────────────────────────────────────────────────
+        st.warning("Edit mode active — changes are logged below.", icon="⚠️")
+        _sgc  = st.number_input("SGC Rate (%)",             value=st.session_state.tax_sgc,     min_value=0.0,  max_value=20.0, step=0.25, format="%.2f")
+        _ptax = st.number_input("VIC Payroll Tax Rate (%)", value=st.session_state.tax_ptax,    min_value=0.0,  max_value=10.0, step=0.01, format="%.2f")
+        _top  = st.number_input("Top Marginal Rate (%)",    value=st.session_state.tax_top,     min_value=30.0, max_value=55.0, step=0.5,  format="%.1f",
+                                help="s12-5 ITAA 1997 — currently 45% on income > $190,000")
+        _med  = st.number_input("Medicare Levy (%)",        value=st.session_state.tax_med,     min_value=0.0,  max_value=5.0,  step=0.5,  format="%.1f",
+                                help="s8 Medicare Levy Act 1986 — currently 2%")
+        _gst  = st.number_input("GST Rate (%) – gross-up",  value=st.session_state.tax_gst_fbt, min_value=0.0,  max_value=20.0, step=0.5,  format="%.1f",
+                                help="Used in Type 1 gross-up formula. Normally 10% (GSTA 1999).")
+
+        import datetime as _dt
+        for _field, _old, _new in [
+            ("SGC Rate",          st.session_state.tax_sgc,     _sgc),
+            ("Payroll Tax Rate",  st.session_state.tax_ptax,    _ptax),
+            ("Top Marginal Rate", st.session_state.tax_top,     _top),
+            ("Medicare Levy",     st.session_state.tax_med,     _med),
+            ("GST (gross-up)",    st.session_state.tax_gst_fbt, _gst),
+        ]:
+            if abs(_old - _new) > 0.001:
+                st.session_state["tax_change_log"].append({
+                    "field": _field, "from": f"{_old:.2f}%",
+                    "to": f"{_new:.2f}%",
+                    "time": _dt.datetime.now().strftime("%H:%M:%S"),
+                })
+        st.session_state.tax_sgc, st.session_state.tax_ptax = _sgc, _ptax
+        st.session_state.tax_top, st.session_state.tax_med, st.session_state.tax_gst_fbt = _top, _med, _gst
+
+        sgc_rate       = _sgc / 100
+        vic_ptax_rate  = _ptax / 100
+        indiv_top_rate = _top / 100
+        medicare_levy  = _med / 100
+        gst_rate_fbt   = _gst / 100
 
     # Derived — single source of truth
     fbt_rate  = indiv_top_rate + medicare_levy
@@ -383,12 +458,42 @@ with st.sidebar:
         f'<div style="font-size:0.68rem;color:#888;margin-top:0.3rem;line-height:1.6">'
         f'<b style="color:#ccc">FBT Rate:</b> {indiv_top_rate*100:.1f}% + {medicare_levy*100:.1f}% = '
         f'<b style="color:#E8192C">{fbt_rate*100:.1f}%</b><br>'
-        f'<b style="color:#ccc">T1</b> (1+GST)/(1−FBT) = {fbt_type1:.4f} &nbsp;'
-        f'<b style="color:#ccc">T2</b> 1/(1−FBT) = {fbt_type2:.4f}'
+        f'<b style="color:#ccc">T1</b> (1+GST)/(1-FBT) = {fbt_type1:.4f} &nbsp;'
+        f'<b style="color:#ccc">T2</b> 1/(1-FBT) = {fbt_type2:.4f}'
         f'</div>',
         unsafe_allow_html=True
     )
-    st.markdown(f'<div style="font-size:0.68rem;color:#666;margin-top:0.3rem">SGC: {sgc_rate*100:.2f}% · Payroll Tax: {vic_ptax_rate*100:.2f}%</div>', unsafe_allow_html=True)
+
+    with st.expander("ℹ️ FBT gross-up explained", expanded=False):
+        st.markdown(f"""
+**Fringe Benefits Tax (FBT)** is levied on employers at **{fbt_rate*100:.1f}%** on the *grossed-up* value of non-cash benefits (*FBTAA 1986 s5B*).
+
+**Type 1** (GST-creditable benefits — e.g. company cars):
+> Gross-up = Taxable Value × **{fbt_type1:.4f}**
+> Formula: (1 + GST rate) ÷ (1 − FBT rate) ≈ 1.10 ÷ 0.53
+> ATO publishes the authoritative rate annually; FY2026 = **2.0802**.
+
+**Type 2** (non-GST-creditable — e.g. loans, living-away allowances):
+> Gross-up = Taxable Value × **{fbt_type2:.4f}**
+> Formula: 1 ÷ (1 − FBT rate) = 1 ÷ {1-fbt_rate:.2f}
+
+**FBT Year:** 1 April → 31 March (not aligned to financial year).
+**Lodgement deadline:** 21 May (or extended agent date).
+
+*References: FBTAA 1986; ATO Tax Withheld Calculator FY2026; PCG 2024/2 (EV charging rate).*
+        """)
+
+    if st.session_state["tax_change_log"]:
+        _n = len(st.session_state["tax_change_log"])
+        with st.expander(f"📋 Change Log ({_n} edit{'s' if _n != 1 else ''})", expanded=False):
+            for _e in reversed(st.session_state["tax_change_log"]):
+                st.markdown(
+                    f'<div style="font-size:0.70rem;color:#aaa;line-height:1.8">'
+                    f'<b style="color:#E8192C">{_e["time"]}</b> &nbsp;'
+                    f'{_e["field"]}: {_e["from"]} → <b style="color:#ccc">{_e["to"]}</b>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
 
     st.markdown("---")
 
@@ -476,167 +581,20 @@ if page == "Executive Overview":
         f"{ENTITY}  |  {period_label}  |  as at {REPORT_DATE_DYN}"
     )
 
-    # ── Inline filter bar ──────────────────────────────────────────────────────
-    _lbl = '<p style="font-size:0.72rem;font-weight:700;color:#555;margin:0 0 0.15rem;text-transform:uppercase;letter-spacing:0.05em">'
-
-    with st.container():
-        st.markdown("""<div style="background:#F5F5F5;border-radius:10px;padding:1rem 1.4rem 1rem;
-                    margin-bottom:1rem;border:1px solid #ddd">""", unsafe_allow_html=True)
-
-        # ── ROW 1 : View Type + Financial Year ────────────────────────────────
-        r1a, r1b, r1c = st.columns([2.5, 1.2, 3.3])
-        with r1a:
-            st.markdown(_lbl + "View Type</p>", unsafe_allow_html=True)
-            view_type = st.radio(
-                "View Type", ["Monthly", "Quarterly", "YTD", "Full Year"],
-                index=["Monthly","Quarterly","YTD","Full Year"].index(
-                    st.session_state.view_type if st.session_state.view_type in ["Monthly","Quarterly","YTD","Full Year"] else "YTD"
-                ),
-                horizontal=True, label_visibility="collapsed", key="eo_view",
-            )
-            st.session_state.view_type = view_type
-
-        with r1b:
-            st.markdown(_lbl + "Financial Year</p>", unsafe_allow_html=True)
-            sel_fy = st.selectbox("FY", _fy_years,
-                index=_fy_years.index(st.session_state.sel_fy) if st.session_state.sel_fy in _fy_years else len(_fy_years)-1,
-                label_visibility="collapsed", key="eo_fy")
-            st.session_state.sel_fy = sel_fy
-
-        # ── ROW 2 : Period selector (changes based on view type) ──────────────
-        _fy_s, _fy_e_raw = _fy_bounds(sel_fy)
-        _fy_e = min(_fy_e_raw, _all_periods[-1])
-        _fy_int = int(sel_fy[2:])
-
-        with r1c:
-            if view_type in ("Monthly", "YTD"):
-                # Months available for this FY (Jul→Jun, clamped to data)
-                _fy_mo_periods = [p for p in _all_periods if _fy_s <= p <= _fy_e]
-                _mo_options    = [f"{_cal.month_name[int(p[5:7])]} {p[:4]}" for p in _fy_mo_periods]
-                _mo_vals       = _fy_mo_periods   # parallel list of "YYYY-MM"
-                _cur_mo_str    = f"{st.session_state.sel_month:02d}"
-                _cur_mo_matches= [i for i,p in enumerate(_mo_vals)
-                                   if p[5:7] == _cur_mo_str]
-                _mo_def_idx    = _cur_mo_matches[-1] if _cur_mo_matches else len(_mo_vals)-1
-
-                _col_lbl = "End Month" if view_type == "YTD" else "Month"
-                st.markdown(_lbl + f"{_col_lbl}</p>", unsafe_allow_html=True)
-                sel_mo_label = st.selectbox(_col_lbl, _mo_options,
-                    index=_mo_def_idx, label_visibility="collapsed", key="eo_month")
-                sel_mo_period = _mo_vals[_mo_options.index(sel_mo_label)]
-                st.session_state.sel_month = int(sel_mo_period[5:7])
-
-                period_end   = sel_mo_period
-                period_start = _fy_s if view_type == "YTD" else sel_mo_period
-
-            elif view_type == "Quarterly":
-                _qs = _fy_quarters(sel_fy)
-                _q_keys = list(_qs.keys())
-                _cur_q  = st.session_state.sel_quarter
-                _q_idx  = _q_keys.index(_cur_q) if _cur_q in _q_keys else len(_q_keys)-1
-                st.markdown(_lbl + "Quarter</p>", unsafe_allow_html=True)
-                sel_q = st.selectbox("Quarter", _q_keys,
-                    index=_q_idx, label_visibility="collapsed", key="eo_quarter")
-                st.session_state.sel_quarter = sel_q
-                period_start, period_end = _qs[sel_q]
-
-            else:  # Full Year
-                period_start, period_end = _fy_s, _fy_e
-                st.markdown(_lbl + "Period</p>", unsafe_allow_html=True)
-                _fy_yr = int(sel_fy[2:])
-                st.markdown(f"""<div style="padding:0.4rem 0.8rem;background:white;border:1px solid #ddd;
-                    border-radius:6px;font-size:0.83rem;color:#444;margin-top:0.05rem">
-                    Jul {_fy_yr-1} → Jun {_fy_yr} (full year)</div>""",
-                    unsafe_allow_html=True)
-
-        # Clamp to available data
-        period_start = max(period_start, _all_periods[0])
-        period_end   = min(period_end,   _all_periods[-1])
-        selected_period = period_end   # backward-compat alias
-
-        # Recompute display labels
-        _pe_yr, _pe_mo = map(int, period_end.split("-"))
-        _ps_yr, _ps_mo = map(int, period_start.split("-"))
-        REPORT_DATE_DYN = f"{_cal.monthrange(_pe_yr,_pe_mo)[1]} {_cal.month_name[_pe_mo]} {_pe_yr}"
-        _pe_idx     = _all_periods.index(period_end) if period_end in _all_periods else len(_all_periods)-1
-        prev_period = _all_periods[_pe_idx-1] if _pe_idx > 0 else period_end
-        period_label = {
-            "Monthly":   f"{_cal.month_name[_pe_mo]} {_pe_yr}",
-            "Quarterly": st.session_state.get("sel_quarter",""),
-            "YTD":       f"Jul {_ps_yr} → {_cal.month_name[_pe_mo]} {_pe_yr}",
-            "Full Year": f"Full Year {sel_fy}",
-        }[view_type]
-
-        # Period badge
-        badge_colours = {"Monthly":"#005EA5","Quarterly":"#F7941D","YTD":"#E8192C","Full Year":"#00875A"}
-        st.markdown(f"""<div style="margin-top:0.6rem">
-            <span style="background:{badge_colours[view_type]};color:white;padding:3px 10px;
-                border-radius:12px;font-size:0.78rem;font-weight:700">{view_type}</span>
-            <span style="font-size:0.83rem;color:#444;margin-left:0.5rem">
-                {period_label} &nbsp;·&nbsp; as at <b>{REPORT_DATE_DYN}</b>
-            </span></div>""", unsafe_allow_html=True)
-
-        st.markdown("<hr style='margin:0.8rem 0 0.6rem;border-color:#ddd'>", unsafe_allow_html=True)
-
-        # ── ROW 3 : Region + Cost Centre with Select All / Clear ──────────────
-        # Callbacks for Select All / Clear buttons
-        def _sel_all_reg():
-            st.session_state["eo_reg_dom"] = True
-            st.session_state["eo_reg_int"] = True
-        def _clr_reg():
-            st.session_state["eo_reg_dom"] = True   # keep at least one
-            st.session_state["eo_reg_int"] = False
-        def _sel_all_cc():
-            for _n in _cc_map: st.session_state[f"eo_cc_{_n}"] = True
-        def _clr_cc():
-            for _n in _cc_map: st.session_state[f"eo_cc_{_n}"] = False
-
-        fc1, fc2, fc3 = st.columns([1.1, 2, 2])
-
-        with fc1:
-            st.markdown(_lbl + "Region</p>", unsafe_allow_html=True)
-            rb1, rb2 = st.columns(2)
-            with rb1: st.button("All",   on_click=_sel_all_reg, key="btn_reg_all",  use_container_width=True)
-            with rb2: st.button("Clear", on_click=_clr_reg,     key="btn_reg_clr",  use_container_width=True)
-            reg_dom = st.checkbox("Domestic",      value=True, key="eo_reg_dom")
-            reg_int = st.checkbox("International", value=True, key="eo_reg_int")
-            selected_regions = (
-                ["Domestic","International"] if (reg_dom and reg_int)
-                else ["Domestic"]      if reg_dom
-                else ["International"] if reg_int
-                else ["Domestic","International"]
-            )
-
-        with fc2:
-            st.markdown(_lbl + "Cost Centre</p>", unsafe_allow_html=True)
-            cb1, cb2 = st.columns(2)
-            with cb1: st.button("All",   on_click=_sel_all_cc, key="btn_cc_all", use_container_width=True)
-            with cb2: st.button("Clear", on_click=_clr_cc,     key="btn_cc_clr", use_container_width=True)
-            selected_cc_names = []
-            _cc_list = list(_cc_map.keys())
-            for _n in _cc_list[:4]:
-                if st.checkbox(_n, value=st.session_state.get(f"eo_cc_{_n}", True), key=f"eo_cc_{_n}"):
-                    selected_cc_names.append(_n)
-
-        with fc3:
-            st.markdown(_lbl + "&nbsp;</p>", unsafe_allow_html=True)
-            st.markdown("<div style='margin-top:2.05rem'></div>", unsafe_allow_html=True)
-            for _n in _cc_list[4:]:
-                if st.checkbox(_n, value=st.session_state.get(f"eo_cc_{_n}", True), key=f"eo_cc_{_n}"):
-                    selected_cc_names.append(_n)
-
-        if not selected_cc_names:
-            selected_cc_names = list(_cc_map.keys())
-        selected_cc_codes = [_cc_map[n] for n in selected_cc_names]
-
-        # Summary caption
-        r_lbl = ", ".join(selected_regions) if len(selected_regions) < 2 else "All Regions"
-        c_lbl = f"{len(selected_cc_names)} of {len(_cc_map)} cost centres" if len(selected_cc_names) < len(_cc_map) else "All Cost Centres"
-        st.markdown(f"""<div style="font-size:0.76rem;color:#666;margin-top:0.4rem">
-            Showing: <b>{r_lbl}</b> &nbsp;·&nbsp; <b>{c_lbl}</b></div>""",
-            unsafe_allow_html=True)
-
-        st.markdown("</div>", unsafe_allow_html=True)
+    # ── Period + filter summary badges ────────────────────────────────────────
+    _badge_clr_eo = {"Monthly":"#005EA5","Quarterly":"#F7941D","YTD":"#E8192C","Full Year":"#00875A"}[view_type]
+    _r_lbl = "All Regions" if len(selected_regions) == 2 else ", ".join(selected_regions)
+    _c_lbl = "All Cost Centres" if len(selected_cc_names) == len(_cc_names_all) else f"{len(selected_cc_names)} of {len(_cc_names_all)} cost centres"
+    st.markdown(
+        f'<div style="background:#F5F5F5;border-radius:10px;padding:0.65rem 1.2rem;'
+        f'margin-bottom:1rem;border:1px solid #ddd;display:flex;align-items:center;gap:0.6rem">'
+        f'<span style="background:{_badge_clr_eo};color:white;padding:3px 10px;border-radius:12px;'
+        f'font-size:0.78rem;font-weight:700">{view_type}</span>'
+        f'<span style="font-size:0.83rem;color:#444">{period_label} &nbsp;·&nbsp; as at <b>{REPORT_DATE_DYN}</b></span>'
+        f'<span style="margin-left:auto;font-size:0.75rem;color:#777">🌏 {_r_lbl} &nbsp;·&nbsp; {_c_lbl}</span>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1375,6 +1333,32 @@ elif page == "Balance Sheet":
     section("Accounting Equation Check  —  Assets = Liabilities + Equity + Net P&L")
     st.caption("Figures sourced from the Balance Sheet above. Current Year Earnings = GL Revenue − Expenses (same as Income Statement). "
                "FY2026 is open — Retained Earnings won't update until the 30 Jun 2026 year-end closing entry is posted.")
+    with st.expander("ℹ️ How does the Accounting Equation work?", expanded=False):
+        st.markdown("""
+**The Accounting Equation** is the foundation of double-entry bookkeeping:
+
+> **Assets = Liabilities + Equity**
+
+In an *open financial year* (FY2026, Jul 2025 – Jun 2026), the equation expands to:
+
+> **Assets = Liabilities + Retained Earnings + Current Year Earnings**
+
+**Why split Equity into two lines?**
+
+Under Australian Accounting Standards (AASB 101 — *Presentation of Financial Statements*), equity comprises:
+- **Retained Earnings** — cumulative surpluses from prior years, updated only when **closing entries** are posted at 30 June each year.
+- **Current Year Earnings** — the YTD net surplus/deficit accumulating in Revenue & Expense accounts. Not yet transferred to Retained Earnings because FY2026 has not closed.
+
+**What the ✓ Difference row tells you:**
+
+| Result | Meaning |
+|---|---|
+| $0 | GL balances — every debit has a matching credit |
+| Non-zero | Data integrity issue — investigate unposted or one-sided journals |
+
+**Compliance reference:** *AASB 101 §54–55* (Balance Sheet presentation); *Framework for the Preparation of Financial Statements* (AASB/IASB Conceptual Framework 4.1).
+        """)
+
 
     # Equation Check — Assets and Liabilities sourced from the Balance Sheet above
     # so the figures tie exactly to the formatted BS.
@@ -1855,6 +1839,23 @@ elif page == "Accounts Payable":
 
     # ── DPO Trend vs Target ────────────────────────────────────────────────
     st.markdown("#### DPO Trend vs Target")
+    with st.expander("ℹ️ How is DPO calculated?", expanded=False):
+        st.markdown("""
+**Days Payable Outstanding (DPO)** measures how long, on average, the organisation takes to pay its suppliers.
+
+**Formula used** (weighted average, paid invoices only):
+
+> DPO = Σ (Days to Pay × Invoice Amount ex-GST) ÷ Σ (Invoice Amount ex-GST)
+
+Weighting by invoice value ensures large invoices influence the result proportionally — a simple average would over-represent small invoices.
+
+**Days to Pay** = Payment Date − Invoice Date (calendar days).
+
+**Why 35 days?** RMIT UP's standard payment terms are Net-30. The 35-day target adds a 5-day processing buffer for approval workflows. Staying below 35 days keeps supplier relationships healthy and avoids late-payment penalties under the *Payment Terms Policy (VGPB 2022)*.
+
+**Limitation:** DPO only reflects *paid* invoices in the selected period. Unpaid/overdue invoices are excluded from the DPO metric — monitor the Aging Schedule above for those.
+        """)
+
     ap_paid_all = ap_all[ap_all["status"] == "Paid"].copy()
     ap_paid_all["days_to_pay"] = (ap_paid_all["payment_date"] - ap_paid_all["invoice_date"]).dt.days
     _dpo_cols = ap_paid_all[["period", "days_to_pay", "amount_ex_gst"]]
@@ -3642,3 +3643,168 @@ LIMIT 15;
                 st.info("No results returned.")
         except Exception as e:
             st.error(f"Query error: {e}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAGE 11 – ABOUT & GOVERNANCE
+# ─────────────────────────────────────────────────────────────────────────────
+
+elif page == "About & Governance":
+    page_header(
+        "About & Governance",
+        f"{ENTITY}  |  System Logic, Compliance References & Work Instructions",
+    )
+
+    st.markdown("""
+> This page documents the purpose, data sources, business logic, and compliance
+> framework behind each module. It is intended for finance team members, auditors,
+> and anyone onboarding to the system — no coding knowledge required.
+    """)
+
+    # ── Dashboard Purpose ──────────────────────────────────────────────────────
+    section("Dashboard Purpose")
+    st.markdown("""
+This dashboard is a **Financial Management & Compliance Tool** for RMIT University Programs (RMIT UP).
+It consolidates general ledger data, sub-ledger transactions, tax obligations, and month-end
+controls into a single platform — replacing manual Excel-based reporting.
+
+**Primary users:** Financial Accountant, Finance Manager, CFO, Internal Audit
+**Reporting period:** FY2026 (1 July 2025 – 30 June 2026)
+**Data source:** Synthetic dataset generated from RMIT UP's chart of accounts and operational parameters
+**Refresh cycle:** On-demand (database rebuilt on app startup if schema changes are detected)
+    """)
+
+    st.markdown("---")
+
+    # ── Module Reference ───────────────────────────────────────────────────────
+    section("Module Reference — What Each Tab Does")
+
+    modules = [
+        ("Executive Overview", "📊",
+         "High-level KPI dashboard with Revenue, Expenses, Net Surplus/Deficit and MoM trends. "
+         "Includes budget overlay and cumulative P&L curve. Entry point for senior leadership.",
+         "GL → Revenue/Expense accounts 4001–5999",
+         "AASB 101 (Presentation of Financial Statements)"),
+
+        ("Month-End Close", "✅",
+         "Checklist tracker for period-end controls: GL review, reconciliations, BAS lodgement, "
+         "payroll journals, intercompany sign-off. Status: Not Started / In Progress / Complete.",
+         "month_end_checklist table",
+         "Internal Control Framework; AASB 110 (Events After Reporting Period)"),
+
+        ("Income Statement", "📈",
+         "Profit & Loss statement showing Revenue by stream, Operating Expenses by category, "
+         "FBT provision, corporate tax provision, and NPAT. Supports Monthly / Quarterly / YTD / Full Year views.",
+         "GL → accounts 4001–5999 + budget table",
+         "AASB 101 §82 (P&L line items); AASB 112 (Income Taxes)"),
+
+        ("Balance Sheet", "⚖️",
+         "Statement of Financial Position as at period end. Assets sourced from bank, AR subledger "
+         "and fixed asset register. Liabilities blended from GL and source tables. "
+         "Includes Accounting Equation integrity check.",
+         "GL + bank_transactions + accounts_receivable + fixed_assets + depreciation_schedule",
+         "AASB 101 §54 (Balance Sheet); AASB 116 (PP&E); AASB 16 (Leases)"),
+
+        ("Accounts Receivable", "🧾",
+         "AR aging schedule, DSO analysis, domestic vs international split, and open invoice register. "
+         "DSO target configurable in sidebar. Traffic-light status for overdue accounts.",
+         "accounts_receivable subledger",
+         "AASB 9 (Financial Instruments — Impairment); ATO GST supply type classification"),
+
+        ("Accounts Payable", "💳",
+         "AP aging schedule, DPO trend vs 35-day target, top supplier analysis, upcoming payments "
+         "due in 30 days, and full invoice register. Sourced from supplier invoice sub-ledger.",
+         "accounts_payable + suppliers tables",
+         "VGPB Payment Terms Policy 2022; ATO Input Tax Credit (ITC) rules (GSTA 1999)"),
+
+        ("Bank Reconciliation", "🏦",
+         "Reconciles bank statement closing balance to GL cash balance. Identifies unmatched "
+         "items (deposits in transit, outstanding cheques). Difference should always be nil.",
+         "bank_transactions table (gl_matched flag)",
+         "AASB 107 (Cash Flow Statements); Internal Control — Segregation of Duties"),
+
+        ("Fixed Assets", "🏗️",
+         "Asset register with cost, accumulated depreciation, and NBV. Depreciation calculated "
+         "using straight-line method per ATO effective life tables. Traffic-light for fully "
+         "depreciated assets and NBV ratio.",
+         "fixed_assets + depreciation_schedule tables",
+         "AASB 116 (PP&E — cost model); TR 2024/1 (ATO Effective Life); AASB 136 (Impairment)"),
+
+        ("Tax Compliance", "🧮",
+         "Covers GST (BAS), Payroll Tax (VIC), FBT (FBTAA 1986), LCT, and Corporate Tax. "
+         "FBT gross-up uses ATO-published Type 1 (2.0802) and Type 2 rates. "
+         "Tax rates are locked by default — unlock via ✏️ in sidebar.",
+         "gst_transactions + bas_returns + payroll_tax + fbt_register + GL",
+         "GSTA 1999; FBTAA 1986; PAYG — s12-5 ITAA 1997; Payroll Tax Act 2007 (VIC); LCTA 1999"),
+
+        ("SQL Analysis", "🔍",
+         "Live SQL query runner against the underlying SQLite database. Includes pre-built "
+         "analytical queries and a schema browser with type-drift detection and LCT/FBT flags.",
+         "All tables (direct SQLite access)",
+         "No specific standard — data governance and audit trail tool"),
+    ]
+
+    for name, icon, purpose, source, compliance in modules:
+        with st.expander(f"{icon}  {name}", expanded=False):
+            col_a, col_b = st.columns([3, 2])
+            with col_a:
+                st.markdown(f"**Purpose**\n\n{purpose}")
+            with col_b:
+                st.markdown(f"**Data Source**\n\n`{source}`")
+                st.markdown(f"**Compliance Reference**\n\n{compliance}")
+
+    st.markdown("---")
+
+    # ── Key Assumptions ────────────────────────────────────────────────────────
+    section("Key Assumptions & Known Limitations")
+    st.markdown("""
+| # | Assumption / Limitation | Impact |
+|---|---|---|
+| 1 | Dataset is **synthetic** — generated from statistical distributions, not live SAP/Banner data | Figures are illustrative only; not for external reporting |
+| 2 | General Ledger contains **P&L journals only** — no complete double-entry opening BS entries | GL-derived asset/liability totals differ from BS sub-ledger figures; Equation Check uses BS as source of truth |
+| 3 | **Retained Earnings** is not updated during FY2026 — closing entries posted only at 30 June | Current Year Earnings = YTD net P&L; RE = FY2025 closing balance |
+| 4 | Depreciation uses **straight-line** for all asset classes | Assets with diminishing-value treatment (per TR 2024/1) would differ |
+| 5 | GST Receivable is **estimated** (ITC − 30% of output tax) — not a precise BAS reconciliation | Reconcile to actual BAS lodgements for compliance purposes |
+| 6 | FBT Type 1 gross-up rate hardcoded at **2.0802** per ATO FY2026 publication | Must update annually when ATO releases new rates (usually November) |
+| 7 | DPO excludes **unpaid/overdue** invoices — reflects only settled payment behaviour | Aging Schedule captures the outstanding exposure separately |
+    """)
+
+    st.markdown("---")
+
+    # ── Compliance Calendar ────────────────────────────────────────────────────
+    section("Key Compliance Deadlines — FY2026")
+    st.markdown("""
+| Obligation | Authority | Due Date | Module |
+|---|---|---|---|
+| Monthly BAS lodgement | ATO — GSTA 1999 | 21st of following month | Tax Compliance → GST/BAS |
+| Quarterly BAS (if applicable) | ATO | 28th of month after quarter | Tax Compliance → GST/BAS |
+| Payroll Tax monthly return | SRO Victoria | 7th of following month | Tax Compliance → Payroll Tax |
+| FBT return lodgement | ATO — FBTAA 1986 | 21 May 2026 (or agent date) | Tax Compliance → FBT |
+| Year-end closing entries | Internal | 30 June 2026 | Month-End Close |
+| Financial statements sign-off | Board / CFO | ~August 2026 | Balance Sheet / Income Statement |
+| VAGO audit commencement | VAGO | ~September 2026 | All modules |
+    """)
+
+    st.markdown("---")
+
+    # ── Governance & Change Control ────────────────────────────────────────────
+    section("Governance & Change Control")
+    st.markdown("""
+**Tax Rate Changes**
+Tax rates (SGC, Payroll Tax, FBT components) are locked by default. To edit:
+1. Click the **✏️ checkbox** next to "Tax Rate Configuration" in the sidebar
+2. Adjust rates — every change is timestamped in the Change Log automatically
+3. Lock again by unchecking ✏️
+
+**Data Refresh**
+The SQLite database rebuilds automatically when the application starts and detects a schema change.
+To force a rebuild locally: delete `data/finance_data.db` and restart Streamlit.
+
+**Access Control**
+This dashboard is a reporting tool — it does not write back to source systems.
+All data is read-only except tax rate session overrides (not persisted across sessions).
+
+**Feedback & Improvement**
+Identified gaps or suggested enhancements should be logged in the team's issue tracker
+and reviewed at each month-end close retrospective.
+    """)

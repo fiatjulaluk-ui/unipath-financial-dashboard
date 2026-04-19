@@ -1,10 +1,10 @@
 ic_id,period,transaction_date,entity_from,entity_to,description,amount,account_dr,account_cr,status
-IC3001,2025-07,2025-07-31,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",91360.29,5300,2400,Matched
-IC3002,2025-08,2025-08-31,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",88855.81,5300,2400,Matched
-IC3003,2025-09,2025-09-30,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",83315.6,5300,2400,Matched
-IC3004,2025-10,2025-10-31,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",88378.89,5300,2400,Matched
-IC3005,2025-11,2025-11-30,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",85292.88,5300,2400,Matched
-IC3006,2025-12,2025-12-31,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",72594.04,5300,2400,Matched
-IC3007,2026-01,2026-01-31,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",92262.7,5300,2400,Matched
-IC3008,2026-02,2026-02-28,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",85522.75,5300,2400,Matched
-IC3009,2026-03,2026-03-31,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",88152.8,5300,2400,Matched
+IC3001,2025-07,2025-07-31,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",85331.78,5300,2400,Matched
+IC3002,2025-08,2025-08-31,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",90047.58,5300,2400,Matched
+IC3003,2025-09,2025-09-30,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",95028.99,5300,2400,Matched
+IC3004,2025-10,2025-10-31,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",73260.94,5300,2400,Matched
+IC3005,2025-11,2025-11-30,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",85340.57,5300,2400,Matched
+IC3006,2025-12,2025-12-31,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",85487.71,5300,2400,Matched
+IC3007,2026-01,2026-01-31,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",84522.86,5300,2400,Matched
+IC3008,2026-02,2026-02-28,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",89068.48,5300,2400,Matched
+IC3009,2026-03,2026-03-31,RMIT University,RMIT UP Pty Ltd,"Shared services recharge – Finance, HR, IT, Legal",84563.61,5300,2400,Matched

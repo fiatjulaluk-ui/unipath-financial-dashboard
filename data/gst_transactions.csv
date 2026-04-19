@@ -1,19 +1,55 @@
-gst_id,period,transaction_date,description,transaction_type,amount_excl_gst,gst_amount,account_code
-GST08001,2025-07,2025-07-31,GST collected on taxable supplies,Output Tax,617533.56,61753.36,2200
-GST08002,2025-07,2025-07-31,Input tax credits on acquisitions,Input Tax Credit,169864.54,16986.45,1201
-GST08003,2025-08,2025-08-31,GST collected on taxable supplies,Output Tax,622767.62,62276.76,2200
-GST08004,2025-08,2025-08-31,Input tax credits on acquisitions,Input Tax Credit,184666.05,18466.6,1201
-GST08005,2025-09,2025-09-30,GST collected on taxable supplies,Output Tax,602726.65,60272.67,2200
-GST08006,2025-09,2025-09-30,Input tax credits on acquisitions,Input Tax Credit,166826.22,16682.62,1201
-GST08007,2025-10,2025-10-31,GST collected on taxable supplies,Output Tax,589218.75,58921.88,2200
-GST08008,2025-10,2025-10-31,Input tax credits on acquisitions,Input Tax Credit,176439.74,17643.97,1201
-GST08009,2025-11,2025-11-30,GST collected on taxable supplies,Output Tax,628780.02,62878.0,2200
-GST08010,2025-11,2025-11-30,Input tax credits on acquisitions,Input Tax Credit,161962.4,16196.24,1201
-GST08011,2025-12,2025-12-31,GST collected on taxable supplies,Output Tax,611632.8,61163.28,2200
-GST08012,2025-12,2025-12-31,Input tax credits on acquisitions,Input Tax Credit,189551.57,18955.16,1201
-GST08013,2026-01,2026-01-31,GST collected on taxable supplies,Output Tax,562688.58,56268.86,2200
-GST08014,2026-01,2026-01-31,Input tax credits on acquisitions,Input Tax Credit,173967.11,17396.71,1201
-GST08015,2026-02,2026-02-28,GST collected on taxable supplies,Output Tax,589884.39,58988.44,2200
-GST08016,2026-02,2026-02-28,Input tax credits on acquisitions,Input Tax Credit,191904.66,19190.47,1201
-GST08017,2026-03,2026-03-31,GST collected on taxable supplies,Output Tax,616551.19,61655.12,2200
-GST08018,2026-03,2026-03-31,Input tax credits on acquisitions,Input Tax Credit,199097.23,19909.72,1201
+gst_id,period,transaction_date,description,supply_type_code,transaction_type,amount_excl_gst,gst_amount,account_code
+GST08001,2025-07,2025-07-31,Taxable supply — domestic programs & consulting,TAXABLE,Output Tax,309639.62,30963.96,2200
+GST08002,2025-07,2025-07-31,GST-free export — offshore program delivery,EXPORT,GST-Free Sale,210099.17,0.0,4002
+GST08003,2025-07,2025-07-31,GST-free domestic — education/exempt services,GST_FREE_SALE,GST-Free Sale,38060.51,0.0,4001
+GST08004,2025-07,2025-07-31,Creditable acquisition — domestic suppliers,TAXABLE_PURCH,Input Tax Credit,115169.47,11516.95,1201
+GST08005,2025-07,2025-07-31,GST-free acquisition — overseas/exempt suppliers,GST_FREE_PURCH,GST-Free Purchase,35571.81,0.0,1202
+GST08006,2025-07,2025-07-31,Input-taxed acquisition — financial/insurance,INPUT_TAXED,GST-Free Purchase,13786.17,0.0,1203
+GST08007,2025-08,2025-08-31,Taxable supply — domestic programs & consulting,TAXABLE,Output Tax,330346.32,33034.63,2200
+GST08008,2025-08,2025-08-31,GST-free export — offshore program delivery,EXPORT,GST-Free Sale,215729.19,0.0,4002
+GST08009,2025-08,2025-08-31,GST-free domestic — education/exempt services,GST_FREE_SALE,GST-Free Sale,57139.72,0.0,4001
+GST08010,2025-08,2025-08-31,Creditable acquisition — domestic suppliers,TAXABLE_PURCH,Input Tax Credit,108436.86,10843.69,1201
+GST08011,2025-08,2025-08-31,GST-free acquisition — overseas/exempt suppliers,GST_FREE_PURCH,GST-Free Purchase,32966.5,0.0,1202
+GST08012,2025-08,2025-08-31,Input-taxed acquisition — financial/insurance,INPUT_TAXED,GST-Free Purchase,16998.75,0.0,1203
+GST08013,2025-09,2025-09-30,Taxable supply — domestic programs & consulting,TAXABLE,Output Tax,314577.39,31457.74,2200
+GST08014,2025-09,2025-09-30,GST-free export — offshore program delivery,EXPORT,GST-Free Sale,229728.19,0.0,4002
+GST08015,2025-09,2025-09-30,GST-free domestic — education/exempt services,GST_FREE_SALE,GST-Free Sale,45777.92,0.0,4001
+GST08016,2025-09,2025-09-30,Creditable acquisition — domestic suppliers,TAXABLE_PURCH,Input Tax Credit,117173.14,11717.31,1201
+GST08017,2025-09,2025-09-30,GST-free acquisition — overseas/exempt suppliers,GST_FREE_PURCH,GST-Free Purchase,34131.39,0.0,1202
+GST08018,2025-09,2025-09-30,Input-taxed acquisition — financial/insurance,INPUT_TAXED,GST-Free Purchase,19167.51,0.0,1203
+GST08019,2025-10,2025-10-31,Taxable supply — domestic programs & consulting,TAXABLE,Output Tax,356189.39,35618.94,2200
+GST08020,2025-10,2025-10-31,GST-free export — offshore program delivery,EXPORT,GST-Free Sale,215850.43,0.0,4002
+GST08021,2025-10,2025-10-31,GST-free domestic — education/exempt services,GST_FREE_SALE,GST-Free Sale,52352.22,0.0,4001
+GST08022,2025-10,2025-10-31,Creditable acquisition — domestic suppliers,TAXABLE_PURCH,Input Tax Credit,127638.19,12763.82,1201
+GST08023,2025-10,2025-10-31,GST-free acquisition — overseas/exempt suppliers,GST_FREE_PURCH,GST-Free Purchase,22119.94,0.0,1202
+GST08024,2025-10,2025-10-31,Input-taxed acquisition — financial/insurance,INPUT_TAXED,GST-Free Purchase,19569.29,0.0,1203
+GST08025,2025-11,2025-11-30,Taxable supply — domestic programs & consulting,TAXABLE,Output Tax,328368.2,32836.82,2200
+GST08026,2025-11,2025-11-30,GST-free export — offshore program delivery,EXPORT,GST-Free Sale,211764.74,0.0,4002
+GST08027,2025-11,2025-11-30,GST-free domestic — education/exempt services,GST_FREE_SALE,GST-Free Sale,49666.2,0.0,4001
+GST08028,2025-11,2025-11-30,Creditable acquisition — domestic suppliers,TAXABLE_PURCH,Input Tax Credit,124340.46,12434.05,1201
+GST08029,2025-11,2025-11-30,GST-free acquisition — overseas/exempt suppliers,GST_FREE_PURCH,GST-Free Purchase,37084.43,0.0,1202
+GST08030,2025-11,2025-11-30,Input-taxed acquisition — financial/insurance,INPUT_TAXED,GST-Free Purchase,17751.9,0.0,1203
+GST08031,2025-12,2025-12-31,Taxable supply — domestic programs & consulting,TAXABLE,Output Tax,345006.43,34500.64,2200
+GST08032,2025-12,2025-12-31,GST-free export — offshore program delivery,EXPORT,GST-Free Sale,235192.17,0.0,4002
+GST08033,2025-12,2025-12-31,GST-free domestic — education/exempt services,GST_FREE_SALE,GST-Free Sale,47365.84,0.0,4001
+GST08034,2025-12,2025-12-31,Creditable acquisition — domestic suppliers,TAXABLE_PURCH,Input Tax Credit,117615.48,11761.55,1201
+GST08035,2025-12,2025-12-31,GST-free acquisition — overseas/exempt suppliers,GST_FREE_PURCH,GST-Free Purchase,36598.56,0.0,1202
+GST08036,2025-12,2025-12-31,Input-taxed acquisition — financial/insurance,INPUT_TAXED,GST-Free Purchase,18065.29,0.0,1203
+GST08037,2026-01,2026-01-31,Taxable supply — domestic programs & consulting,TAXABLE,Output Tax,370045.22,37004.52,2200
+GST08038,2026-01,2026-01-31,GST-free export — offshore program delivery,EXPORT,GST-Free Sale,232180.05,0.0,4002
+GST08039,2026-01,2026-01-31,GST-free domestic — education/exempt services,GST_FREE_SALE,GST-Free Sale,48755.63,0.0,4001
+GST08040,2026-01,2026-01-31,Creditable acquisition — domestic suppliers,TAXABLE_PURCH,Input Tax Credit,120821.28,12082.13,1201
+GST08041,2026-01,2026-01-31,GST-free acquisition — overseas/exempt suppliers,GST_FREE_PURCH,GST-Free Purchase,29969.29,0.0,1202
+GST08042,2026-01,2026-01-31,Input-taxed acquisition — financial/insurance,INPUT_TAXED,GST-Free Purchase,18290.15,0.0,1203
+GST08043,2026-02,2026-02-28,Taxable supply — domestic programs & consulting,TAXABLE,Output Tax,306590.48,30659.05,2200
+GST08044,2026-02,2026-02-28,GST-free export — offshore program delivery,EXPORT,GST-Free Sale,207445.84,0.0,4002
+GST08045,2026-02,2026-02-28,GST-free domestic — education/exempt services,GST_FREE_SALE,GST-Free Sale,44457.09,0.0,4001
+GST08046,2026-02,2026-02-28,Creditable acquisition — domestic suppliers,TAXABLE_PURCH,Input Tax Credit,129065.55,12906.56,1201
+GST08047,2026-02,2026-02-28,GST-free acquisition — overseas/exempt suppliers,GST_FREE_PURCH,GST-Free Purchase,33010.37,0.0,1202
+GST08048,2026-02,2026-02-28,Input-taxed acquisition — financial/insurance,INPUT_TAXED,GST-Free Purchase,21351.31,0.0,1203
+GST08049,2026-03,2026-03-31,Taxable supply — domestic programs & consulting,TAXABLE,Output Tax,321993.25,32199.33,2200
+GST08050,2026-03,2026-03-31,GST-free export — offshore program delivery,EXPORT,GST-Free Sale,235213.14,0.0,4002
+GST08051,2026-03,2026-03-31,GST-free domestic — education/exempt services,GST_FREE_SALE,GST-Free Sale,44276.82,0.0,4001
+GST08052,2026-03,2026-03-31,Creditable acquisition — domestic suppliers,TAXABLE_PURCH,Input Tax Credit,127671.86,12767.19,1201
+GST08053,2026-03,2026-03-31,GST-free acquisition — overseas/exempt suppliers,GST_FREE_PURCH,GST-Free Purchase,33285.34,0.0,1202
+GST08054,2026-03,2026-03-31,Input-taxed acquisition — financial/insurance,INPUT_TAXED,GST-Free Purchase,11796.82,0.0,1203

@@ -251,3 +251,22 @@ JE01125,2026-03,2026-03-31,5204,CC007,Travel & entertainment – 2026-03,13632.7
 JE01125,2026-03,2026-03-31,2001,CC007,Travel & entertainment – 2026-03,0.0,13632.75,Expense,Finance_Team
 JE01126,2026-03,2026-03-31,5300,CC003,Intercompany charge – RMIT University shared services,88444.42,0.0,Intercompany,Finance_Team
 JE01126,2026-03,2026-03-31,2400,CC003,Intercompany charge – RMIT University shared services,0.0,88444.42,Intercompany,Finance_Team
+JE09001,2026-03,2026-03-31,5205,CC003,FBT accrual FY2026 – BEV – Tesla Model 3 Long Range – s58P exempt: taxable value $0,0.0,0.0,FBT_Accrual,Finance_Team
+JE09001,2026-03,2026-03-31,5205,CC003,"FBT accrual FY2026 – ICE Fleet Car – Toyota Camry Hybrid – taxable value $8,968.77 × Type 1 × 47%",8768.71,0.0,FBT_Accrual,Finance_Team
+JE09001,2026-03,2026-03-31,5205,CC003,"FBT accrual FY2026 – Entertainment – Meals & Events – taxable value $14,800.00 × Type 2 × 47%",13124.58,0.0,FBT_Accrual,Finance_Team
+JE09001,2026-03,2026-03-31,5205,CC003,"FBT accrual FY2026 – Expense Payments – Reimbursements – taxable value $8,320.00 × Type 2 × 47%",7378.14,0.0,FBT_Accrual,Finance_Team
+JE09001,2026-03,2026-03-31,2202,CC003,"FBT Payable accrual FY2026 — total $29,271.43 | Due 21 May 2026",0.0,29271.43,FBT_Accrual,Finance_Team
+JE09501,2025-07,2025-07-31,5400,CC003,"Income tax provision 2025-07 — taxable income $268,871 × 30% = $80,661",80661.17,0.0,Tax_Provision,Finance_Team
+JE09501,2025-07,2025-07-31,2203,CC003,"Income tax provision 2025-07 — taxable income $268,871 × 30% = $80,661",0.0,80661.17,Tax_Provision,Finance_Team
+JE09502,2025-08,2025-08-31,5400,CC003,"Income tax provision 2025-08 — taxable income $143,011 × 30% = $42,903",42903.18,0.0,Tax_Provision,Finance_Team
+JE09502,2025-08,2025-08-31,2203,CC003,"Income tax provision 2025-08 — taxable income $143,011 × 30% = $42,903",0.0,42903.18,Tax_Provision,Finance_Team
+JE09503,2025-09,2025-09-30,5400,CC003,"Income tax provision 2025-09 — taxable income $402,178 × 30% = $120,654",120653.53,0.0,Tax_Provision,Finance_Team
+JE09503,2025-09,2025-09-30,2203,CC003,"Income tax provision 2025-09 — taxable income $402,178 × 30% = $120,654",0.0,120653.53,Tax_Provision,Finance_Team
+JE09504,2025-10,2025-10-31,5400,CC003,"Income tax provision 2025-10 — taxable income $56,318 × 30% = $16,895",16895.4,0.0,Tax_Provision,Finance_Team
+JE09504,2025-10,2025-10-31,2203,CC003,"Income tax provision 2025-10 — taxable income $56,318 × 30% = $16,895",0.0,16895.4,Tax_Provision,Finance_Team
+JE09505,2026-01,2026-01-31,5400,CC003,"Income tax provision 2026-01 — taxable income $168,255 × 30% = $50,476",50476.41,0.0,Tax_Provision,Finance_Team
+JE09505,2026-01,2026-01-31,2203,CC003,"Income tax provision 2026-01 — taxable income $168,255 × 30% = $50,476",0.0,50476.41,Tax_Provision,Finance_Team
+JE09506,2026-02,2026-02-28,5400,CC003,"Income tax provision 2026-02 — taxable income $66,569 × 30% = $19,971",19970.67,0.0,Tax_Provision,Finance_Team
+JE09506,2026-02,2026-02-28,2203,CC003,"Income tax provision 2026-02 — taxable income $66,569 × 30% = $19,971",0.0,19970.67,Tax_Provision,Finance_Team
+JE09507,2026-03,2026-03-31,5400,CC003,"Income tax provision 2026-03 — taxable income $255,634 × 30% = $76,690",76690.16,0.0,Tax_Provision,Finance_Team
+JE09507,2026-03,2026-03-31,2203,CC003,"Income tax provision 2026-03 — taxable income $255,634 × 30% = $76,690",0.0,76690.16,Tax_Provision,Finance_Team
