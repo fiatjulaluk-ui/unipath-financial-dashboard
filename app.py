@@ -598,8 +598,6 @@ if page == "Executive Overview":
         unsafe_allow_html=True
     )
 
-
-
     gl  = query("SELECT * FROM general_ledger")
     coa = query("SELECT account_code, account_name FROM chart_of_accounts")
 
@@ -784,7 +782,7 @@ if page == "Executive Overview":
             .reset_index()
         )
         rev_by_acct = rev_by_acct.merge(coa, on="account_code")
-       rev_by_acct["account_name"] = (rev_by_acct["account_name"]
+        rev_by_acct["account_name"] = (rev_by_acct["account_name"]
             .str.replace("Course Fees – ", "")
             .str.replace("Consulting & Advisory Revenue", "Consulting & Advisory"))
         fig2 = px.pie(rev_by_acct, values="credit", names="account_name",
