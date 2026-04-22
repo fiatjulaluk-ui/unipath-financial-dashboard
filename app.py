@@ -791,10 +791,9 @@ if page == "Executive Overview":
                       color_discrete_sequence=CHART_PALETTE, hole=0.45)
         fig2.update_traces(textposition="auto", textinfo="percent+label",
                    textfont_size=10, pull=[0, 0, 0.1, 0.1])
-        fig2.update_layout(
-    height=420, margin=dict(l=10, r=10, t=20, b=60),
-    showlegend=False, paper_bgcolor="white"
-)
+       fig2.update_layout(
+            height=420, margin=dict(l=10, r=10, t=20, b=60),
+            showlegend=False, paper_bgcolor="white"
         )
         st.plotly_chart(fig2, use_container_width=True)
 
