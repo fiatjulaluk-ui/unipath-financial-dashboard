@@ -1478,28 +1478,23 @@ elif page == "Accounts Receivable":
     open_ar_all["due_date"]     = pd.to_datetime(open_ar_all["due_date"])
     # Ref date driven by selected period
     ref_date = pd.Timestamp(f"{selected_period}-01") + pd.offsets.MonthEnd(0)
-    # age_days_invoice = days since invoice date → DSO (performance metric)
-    # age_days         = days past due date     → aging buckets (risk metric)
-    open_ar_all["age_days_invoice"] = (ref_date - open_ar_all["invoice_date"]).dt.days
-    open_ar_all["age_days"]         = (ref_date - open_ar_all["due_date"]).dt.days
+    open_ar_all["age_days"] = (ref_date - open_ar_all["invoice_date"]).dt.days
 
     # Apply region filter
     open_ar = open_ar_all[open_ar_all["region"].isin(selected_regions)].copy()
 
     def aging_bucket(days):
-        if days <= 0:  return "Current (0–30)"   # not yet due
-        if days <= 30: return "Current (0–30)"
-        if days <= 60: return "31–60 Days"
-        if days <= 90: return "61–90 Days"
+        if days <= 30:   return "Current (0–30)"
+        if days <= 60:   return "31–60 Days"
+        if days <= 90:   return "61–90 Days"
         return "90+ Days"
 
     open_ar["bucket"]     = open_ar["age_days"].apply(aging_bucket)
     open_ar_all["bucket"] = open_ar_all["age_days"].apply(aging_bucket)
 
     total_open  = open_ar["total_inc_gst"].sum()
-    overdue_pct = len(open_ar[open_ar["age_days"] > 0]) / len(open_ar) * 100 if len(open_ar) else 0
-    # DSO uses invoice date age (performance metric — how long since we invoiced)
-    dso         = (open_ar["total_inc_gst"] * open_ar["age_days_invoice"]).sum() / open_ar["total_inc_gst"].sum() if total_open else 0
+    overdue_pct = len(open_ar[open_ar["age_days"] > 30]) / len(open_ar) * 100 if len(open_ar) else 0
+    dso         = (open_ar["total_inc_gst"] * open_ar["age_days"]).sum() / open_ar["total_inc_gst"].sum() if total_open else 0
     dso_status  = "neg" if dso > dso_target else "pos"
 
     paid_mtd = ar[(ar["status"] == "Paid") & (ar["period"] == selected_period)]["total_inc_gst"].sum()
@@ -1744,7 +1739,7 @@ elif page == "Accounts Payable":
     ap_all["due_date"]     = pd.to_datetime(ap_all["due_date"])
     ap_all["payment_date"] = pd.to_datetime(ap_all["payment_date"], errors="coerce")
 
-    ref_date = pd.Timestamp("2026-03-31")
+    ref_date = pd.Timestamp(f"{selected_period}-01") + pd.offsets.MonthEnd(0)
 
     # Filter to selected period window (by invoice_date period)
     ap_win = ap_all[
@@ -1846,8 +1841,9 @@ elif page == "Accounts Payable":
             title="Outstanding AP by Supplier Type",
             hole=0.4,
         )
-        fig_type.update_traces(textposition="inside", textinfo="percent+label")
-        fig_type.update_layout(showlegend=False, title_font_size=14)
+        fig_type.update_traces(textposition="outside", textinfo="percent+label", textfont_size=10)
+        fig_type.update_layout(showlegend=False, title_font_size=14,
+                               height=320, margin=dict(l=10, r=10, t=40, b=40))
         st.plotly_chart(fig_type, use_container_width=True)
 
     # ── DPO Trend vs Target ────────────────────────────────────────────────
