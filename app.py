@@ -1071,7 +1071,7 @@ elif page == "Income Statement":
         "pos" if rev_vs_bud >= 0 else "neg"), unsafe_allow_html=True)
     with _ki2: st.markdown(kpi_card(
         "EBIT (pre-tax)", fmt_aud(ebit),
-        f"Tax provision: {fmt_aud(tax_exp)} ({eff_rate:.1f}%)",
+        f"Tax provision: {fmt_aud(abs(tax_exp))} ({eff_rate:.1f}% eff. rate)",
         "pos" if ebit >= 0 else "neg"), unsafe_allow_html=True)
     with _ki3: st.markdown(kpi_card(
         "NPAT", fmt_aud(npat),
@@ -1106,7 +1106,7 @@ elif page == "Income Statement":
         lines.append({"Category": "Total Operating Expenses", "Line Item": "", "Amount": f"${total_exp_ops:,.0f}"})
         lines.append({"Category": "", "Line Item": "", "Amount": ""})
         # ── EBIT ──────────────────────────────────────────────────────────────
-        ebit_label = "EARNINGS BEFORE TAX (EBT)" if ebit >= 0 else "LOSS BEFORE TAX"
+        ebit_label = "EARNINGS BEFORE INTEREST & TAX (EBIT)" if ebit >= 0 else "LOSS BEFORE INTEREST & TAX (EBIT)"
         lines.append({"Category": ebit_label, "Line Item": "", "Amount": fmt_table(ebit)})
         lines.append({"Category": "", "Line Item": "", "Amount": ""})
         # ── Tax provision ─────────────────────────────────────────────────────
@@ -1125,7 +1125,7 @@ elif page == "Income Statement":
             "Total Revenue", "Total Operating Expenses",
         }
         for _, row in pl_df.iterrows():
-            is_ebt  = row["Category"].startswith("EARNINGS BEFORE") or row["Category"].startswith("LOSS BEFORE")
+            is_ebt  = row["Category"].startswith("EARNINGS BEFORE INTEREST") or row["Category"].startswith("LOSS BEFORE INTEREST")
             is_npat = row["Category"].startswith("NET PROFIT") or row["Category"].startswith("NET LOSS")
             bold    = "font-weight:700;" if row["Category"] in _BOLD_CATS or is_ebt or is_npat else ""
             bg      = "background:#F5F5F5;" if (row["Category"] in _BOLD_CATS or is_ebt) else ("background:#EAF7F0;" if is_npat and npat >= 0 else ("background:#FFF0F0;" if is_npat else ""))
