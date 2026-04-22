@@ -2107,7 +2107,7 @@ elif page == "Bank Reconciliation":
 elif page == "Fixed Assets":
     page_header(
         "Fixed Asset Register & Depreciation",
-        f"{ENTITY}  |  {period_label} as at {REPORT_DATE_DYN}"
+        f"{ENTITY}  |  FY2026 YTD as at {REPORT_DATE_DYN}"
     )
 
     fa  = query("SELECT * FROM fixed_assets WHERE status = 'Active'")
@@ -2186,8 +2186,8 @@ elif page == "Fixed Assets":
                           margin=dict(l=0,r=10,t=20,b=30))
         st.plotly_chart(fig, use_container_width=True)
 
-    section(f"Monthly Depreciation Schedule – {period_label}")
-    monthly_dep = dep[dep["period"] >= period_start].groupby(["period","category"])["depreciation"].sum().reset_index()
+    section("Monthly Depreciation Schedule – FY2026 YTD")
+    monthly_dep = dep[dep["period"] >= "2025-07"].groupby(["period","category"])["depreciation"].sum().reset_index()
     fig2 = px.bar(monthly_dep, x="period", y="depreciation", color="category",
                   color_discrete_sequence=CHART_PALETTE, barmode="stack")
     fig2.update_layout(height=320, plot_bgcolor="white", paper_bgcolor="white",
@@ -2205,7 +2205,7 @@ elif page == "Fixed Assets":
 elif page == "Tax Compliance":
     page_header(
         "Tax Compliance Dashboard",
-        f"{ENTITY}  |  GST · Payroll Tax · FBT · BAS  |  FY2026"
+        f"{ENTITY}  |  GST · Payroll Tax · FBT · BAS  |  {sel_fy}"
     )
 
     ptax = query("SELECT * FROM payroll_tax")
@@ -2376,7 +2376,7 @@ elif page == "Tax Compliance":
                 )
             ar_rows_html += (
                 '<tr style="background:#F5F5F5;font-weight:700">'
-                '<td colspan="3" style="padding:6px 8px;font-size:0.81rem">Total AR Revenue (YTD)</td>'
+                '<td colspan="3" style="padding:6px 8px;font-size:0.81rem">Total AR Revenue ({_kpi_lbl})</td>'
                 f'<td style="padding:6px 8px;font-size:0.81rem;text-align:right">{fmt_table(total_ar_rev)}</td>'
                 '<td style="padding:6px 8px;font-size:0.81rem;text-align:right">100%</td>'
                 '<td></td></tr>'
@@ -2420,7 +2420,7 @@ elif page == "Tax Compliance":
                 )
             ap_rows_html += (
                 '<tr style="background:#F5F5F5;font-weight:700">'
-                '<td colspan="3" style="padding:6px 8px;font-size:0.81rem">Total AP Acquisitions (YTD)</td>'
+                '<td colspan="3" style="padding:6px 8px;font-size:0.81rem">Total AP Acquisitions ({_kpi_lbl})</td>'
                 f'<td style="padding:6px 8px;font-size:0.81rem;text-align:right">{fmt_table(total_ap_exp)}</td>'
                 '<td style="padding:6px 8px;font-size:0.81rem;text-align:right">100%</td>'
                 '<td></td></tr>'
