@@ -3654,25 +3654,23 @@ LIMIT 15;
             with get_connection() as conn:
                 result_df = pd.read_sql_query(active_sql, conn)
             if not result_df.empty:
-                _pct_kw    = {"pct", "margin", "ratio", "rate"}
-                _dollar_kw = {"amount","balance","wages","tax","revenue","expense","net",
-                              "cost","dep","variance","gst","itc","outstanding","charge",
-                              "current","days_31","days_61","over_90","current_0","payable",
-                              "collected","spend","total","ic_","threshold","gross","nbv",
-                              "accum","calculated","lodged","price","overdue","not_due",
-                              "ar_","ap_","working_capital"}
-                _col_cfg = {}
+                _pct_kw   = {"pct", "margin", "ratio", "rate"}
+                _count_kw = {"count", "days", "years", "life", "terms", "invoice_count",
+                             "open_inv", "paid_count", "unpaid_count", "dpo", "weighted_dpo",
+                             "avg_days", "sequence", "target_day", "is_", "line_no"}
                 for col in result_df.select_dtypes(include=[np.number]).columns:
                     col_l = col.lower()
                     if any(kw in col_l for kw in _pct_kw):
                         result_df[col] = result_df[col].apply(
                             lambda x: f"{x:.2f}%" if pd.notna(x) else "–")
-                    elif any(kw in col_l for kw in _dollar_kw):
+                    elif any(kw in col_l for kw in _count_kw):
                         result_df[col] = result_df[col].apply(
-                            lambda x: (f"(${abs(x):,.0f})" if x < 0 and abs(x) >= 0.5 else f"${x:,.0f}") if pd.notna(x) else "–")
+                            lambda x: f"{x:,.1f}" if pd.notna(x) else "–")
                     else:
+                        # Default: treat as dollar amount
                         result_df[col] = result_df[col].apply(
-                            lambda x: f"{x:,.0f}" if pd.notna(x) else "–")
+                            lambda x: (f"(${abs(x):,.0f})" if x < 0 and abs(x) >= 0.5
+                                       else f"${x:,.0f}") if pd.notna(x) else "–")
                 st.dataframe(result_df, use_container_width=True, hide_index=True,
                              column_config=right_align_df(result_df))
                 st.caption(f"{len(result_df)} rows returned")
