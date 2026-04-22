@@ -3658,7 +3658,8 @@ LIMIT 15;
                 _dollar_kw = {"amount","balance","wages","tax","revenue","expense","net",
                               "cost","dep","variance","gst","itc","outstanding","charge",
                               "current","days_31","days_61","over_90","current_0","payable",
-                              "collected","spend","total","ic_","threshold","gross"}
+                              "collected","spend","total","ic_","threshold","gross","nbv",
+                              "accum","calculated","lodged","price"}
                 _col_cfg = {}
                 for col in result_df.select_dtypes(include=[np.number]).columns:
                     col_l = col.lower()
