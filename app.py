@@ -3218,50 +3218,44 @@ ORDER BY gl.period;
 --   equity to prove the equation holds.
 -- ══════════════════════════════════════════════════════════════════
 SELECT '① Total Assets'                      AS category,
-    ROUND(SUM(CASE WHEN c.account_type = 'Asset'
-                   THEN gl.debit - gl.credit ELSE 0 END), 2)  AS balance
+    ROUND(COALESCE(SUM(CASE WHEN c.account_type = 'Asset'
+                   THEN gl.debit - gl.credit ELSE 0 END), 0), 2)  AS balance
 FROM general_ledger gl
 JOIN chart_of_accounts c ON gl.account_code = c.account_code
 WHERE gl.period <= '2026-03'
 UNION ALL
 SELECT '② Total Liabilities',
-    ROUND(SUM(CASE WHEN c.account_type = 'Liability'
-                   THEN gl.credit - gl.debit ELSE 0 END), 2)
+    ROUND(COALESCE(SUM(CASE WHEN c.account_type = 'Liability'
+                   THEN gl.credit - gl.debit ELSE 0 END), 0), 2)
 FROM general_ledger gl
 JOIN chart_of_accounts c ON gl.account_code = c.account_code
 WHERE gl.period <= '2026-03'
 UNION ALL
 SELECT '③ Booked Equity  (as at 30 Jun 2025 — prior FY closing)',
-    -- Equity accounts only change at year-end when closing entries transfer
-    -- net P&L into Retained Earnings. In an open FY2026 no closing entry
-    -- has been posted yet, so equity = FY2025 closing balance (≤ 2025-06).
-    -- Current year result is captured separately in line ④.
-    ROUND(SUM(CASE WHEN c.account_type = 'Equity'
-                   THEN gl.credit - gl.debit ELSE 0 END), 2)
+    ROUND(COALESCE(SUM(CASE WHEN c.account_type = 'Equity'
+                   THEN gl.credit - gl.debit ELSE 0 END), 0), 2)
 FROM general_ledger gl
 JOIN chart_of_accounts c ON gl.account_code = c.account_code
 WHERE gl.period <= '2025-06'
 UNION ALL
 SELECT '④ YTD Net P&L  (Revenue − Expenses)',
-    -- Revenue: credit-debit = positive | Expense: credit-debit = negative → net = Revenue minus Expenses
-    ROUND(SUM(CASE WHEN c.account_type IN ('Revenue','Expense')
-                   THEN gl.credit - gl.debit ELSE 0 END), 2)
+    ROUND(COALESCE(SUM(CASE WHEN c.account_type IN ('Revenue','Expense')
+                   THEN gl.credit - gl.debit ELSE 0 END), 0), 2)
 FROM general_ledger gl
 JOIN chart_of_accounts c ON gl.account_code = c.account_code
 WHERE gl.period <= '2026-03'
 UNION ALL
 SELECT '⑤ Total Liabilities + Equity + P&L  (② + ③ + ④)',
-    ROUND(SUM(CASE WHEN c.account_type IN ('Liability','Equity') THEN gl.credit - gl.debit
+    ROUND(COALESCE(SUM(CASE WHEN c.account_type IN ('Liability','Equity') THEN gl.credit - gl.debit
                    WHEN c.account_type = 'Revenue'               THEN gl.credit - gl.debit
                    WHEN c.account_type = 'Expense'               THEN gl.credit - gl.debit
-                   ELSE 0 END), 2)
+                   ELSE 0 END), 0), 2)
 FROM general_ledger gl
 JOIN chart_of_accounts c ON gl.account_code = c.account_code
 WHERE gl.period <= '2026-03'
 UNION ALL
 SELECT '✓ Difference  (① − ⑤)  — must be zero',
-    -- Difference = Sum(debit − credit) across ALL account types = Total Debits − Total Credits = 0
-    ROUND(SUM(gl.debit - gl.credit), 2)
+    ROUND(COALESCE(SUM(gl.debit - gl.credit), 0), 2)
 FROM general_ledger gl
 JOIN chart_of_accounts c ON gl.account_code = c.account_code
 WHERE gl.period <= '2026-03';
@@ -3640,7 +3634,6 @@ LIMIT 15;
             with get_connection() as conn:
                 result_df = pd.read_sql_query(active_sql, conn)
             if not result_df.empty:
-                # Build column_config to keep numbers as numbers (right-aligned)
                 _pct_kw    = {"pct", "margin", "ratio", "rate"}
                 _dollar_kw = {"amount","balance","wages","tax","revenue","expense","net",
                               "cost","dep","variance","gst","itc","outstanding","charge",
@@ -3650,13 +3643,15 @@ LIMIT 15;
                 for col in result_df.select_dtypes(include=[np.number]).columns:
                     col_l = col.lower()
                     if any(kw in col_l for kw in _pct_kw):
-                        _col_cfg[col] = st.column_config.NumberColumn(col, format="%.2f%%")
+                        result_df[col] = result_df[col].apply(
+                            lambda x: f"{x:.2f}%" if pd.notna(x) else "–")
                     elif any(kw in col_l for kw in _dollar_kw):
-                        _col_cfg[col] = st.column_config.NumberColumn(col, format="$%,.0f")
+                        result_df[col] = result_df[col].apply(
+                            lambda x: (f"(${abs(x):,.0f})" if x < 0 else f"${x:,.0f}") if pd.notna(x) else "–")
                     else:
-                        _col_cfg[col] = st.column_config.NumberColumn(col, format="%,d")
-                st.dataframe(result_df, use_container_width=True, hide_index=True,
-                             column_config=_col_cfg if _col_cfg else None)
+                        result_df[col] = result_df[col].apply(
+                            lambda x: f"{x:,.0f}" if pd.notna(x) else "–")
+                st.dataframe(result_df, use_container_width=True, hide_index=True)
                 st.caption(f"{len(result_df)} rows returned")
             else:
                 st.info("No results returned.")
