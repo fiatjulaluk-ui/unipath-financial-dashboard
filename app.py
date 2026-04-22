@@ -3640,21 +3640,23 @@ LIMIT 15;
             with get_connection() as conn:
                 result_df = pd.read_sql_query(active_sql, conn)
             if not result_df.empty:
-                # Format numeric columns
-                _pct_kw  = {"pct", "margin", "ratio", "rate"}
+                # Build column_config to keep numbers as numbers (right-aligned)
+                _pct_kw    = {"pct", "margin", "ratio", "rate"}
                 _dollar_kw = {"amount","balance","wages","tax","revenue","expense","net",
                               "cost","dep","variance","gst","itc","outstanding","charge",
                               "current","days_31","days_61","over_90","current_0","payable",
                               "collected","spend","total","ic_"}
+                _col_cfg = {}
                 for col in result_df.select_dtypes(include=[np.number]).columns:
                     col_l = col.lower()
                     if any(kw in col_l for kw in _pct_kw):
-                        result_df[col] = result_df[col].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "–")
+                        _col_cfg[col] = st.column_config.NumberColumn(col, format="%.2f%%")
                     elif any(kw in col_l for kw in _dollar_kw):
-                        result_df[col] = result_df[col].apply(lambda x: f"${x:,.0f}" if pd.notna(x) else "–")
+                        _col_cfg[col] = st.column_config.NumberColumn(col, format="$%,.0f")
                     else:
-                        result_df[col] = result_df[col].apply(lambda x: f"{x:,}" if pd.notna(x) else "–")
-                st.dataframe(result_df, use_container_width=True, hide_index=True)
+                        _col_cfg[col] = st.column_config.NumberColumn(col, format="%,d")
+                st.dataframe(result_df, use_container_width=True, hide_index=True,
+                             column_config=_col_cfg if _col_cfg else None)
                 st.caption(f"{len(result_df)} rows returned")
             else:
                 st.info("No results returned.")
