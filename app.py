@@ -3659,7 +3659,8 @@ LIMIT 15;
                               "cost","dep","variance","gst","itc","outstanding","charge",
                               "current","days_31","days_61","over_90","current_0","payable",
                               "collected","spend","total","ic_","threshold","gross","nbv",
-                              "accum","calculated","lodged","price"}
+                              "accum","calculated","lodged","price","overdue","not_due",
+                              "ar_","ap_","working_capital"}
                 _col_cfg = {}
                 for col in result_df.select_dtypes(include=[np.number]).columns:
                     col_l = col.lower()
