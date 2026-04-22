@@ -2205,7 +2205,7 @@ elif page == "Fixed Assets":
 elif page == "Tax Compliance":
     page_header(
         "Tax Compliance Dashboard",
-        f"{ENTITY}  |  GST · Payroll Tax · FBT · BAS  |  {sel_fy}"
+        f"{ENTITY}  |  GST · Payroll Tax · FBT · BAS  |  FY2026"
     )
 
     ptax = query("SELECT * FROM payroll_tax")
@@ -2376,7 +2376,7 @@ elif page == "Tax Compliance":
                 )
             ar_rows_html += (
                 '<tr style="background:#F5F5F5;font-weight:700">'
-                '<td colspan="3" style="padding:6px 8px;font-size:0.81rem">Total AR Revenue ({_kpi_lbl})</td>'
+                '<td colspan="3" style="padding:6px 8px;font-size:0.81rem">Total AR Revenue (YTD)</td>'
                 f'<td style="padding:6px 8px;font-size:0.81rem;text-align:right">{fmt_table(total_ar_rev)}</td>'
                 '<td style="padding:6px 8px;font-size:0.81rem;text-align:right">100%</td>'
                 '<td></td></tr>'
@@ -2420,7 +2420,7 @@ elif page == "Tax Compliance":
                 )
             ap_rows_html += (
                 '<tr style="background:#F5F5F5;font-weight:700">'
-                '<td colspan="3" style="padding:6px 8px;font-size:0.81rem">Total AP Acquisitions ({_kpi_lbl})</td>'
+                '<td colspan="3" style="padding:6px 8px;font-size:0.81rem">Total AP Acquisitions (YTD)</td>'
                 f'<td style="padding:6px 8px;font-size:0.81rem;text-align:right">{fmt_table(total_ap_exp)}</td>'
                 '<td style="padding:6px 8px;font-size:0.81rem;text-align:right">100%</td>'
                 '<td></td></tr>'
@@ -3163,21 +3163,23 @@ elif page == "SQL Analysis":
     )
 
     query_labels = {
-        "AR Aging Report": """
+        "AR Aging Report": f"""
 -- Accounts Receivable Aging Report
--- Classifies open invoices into aging buckets for collections management
+-- Classifies open invoices into aging buckets based on days past due date
 SELECT
     customer_name,
     region,
     COUNT(invoice_number)                            AS invoice_count,
-    SUM(CASE WHEN age_days BETWEEN 0  AND 30 THEN total_inc_gst ELSE 0 END) AS current_0_30,
-    SUM(CASE WHEN age_days BETWEEN 31 AND 60 THEN total_inc_gst ELSE 0 END) AS days_31_60,
-    SUM(CASE WHEN age_days BETWEEN 61 AND 90 THEN total_inc_gst ELSE 0 END) AS days_61_90,
-    SUM(CASE WHEN age_days > 90             THEN total_inc_gst ELSE 0 END) AS over_90,
+    SUM(CASE WHEN days_past_due <= 0              THEN total_inc_gst ELSE 0 END) AS current_0_30,
+    SUM(CASE WHEN days_past_due BETWEEN 1  AND 30 THEN total_inc_gst ELSE 0 END) AS days_1_30,
+    SUM(CASE WHEN days_past_due BETWEEN 31 AND 60 THEN total_inc_gst ELSE 0 END) AS days_31_60,
+    SUM(CASE WHEN days_past_due BETWEEN 61 AND 90 THEN total_inc_gst ELSE 0 END) AS days_61_90,
+    SUM(CASE WHEN days_past_due > 90              THEN total_inc_gst ELSE 0 END) AS over_90,
     SUM(total_inc_gst)                               AS total_outstanding
 FROM (
     SELECT *,
-           JULIANDAY('2026-03-31') - JULIANDAY(invoice_date) AS age_days
+           JULIANDAY('{selected_period}-01', 'start of month', '+1 month', '-1 day')
+           - JULIANDAY(due_date) AS days_past_due
     FROM   accounts_receivable
     WHERE  status != 'Paid'
 ) t
@@ -3639,12 +3641,19 @@ LIMIT 15;
                 result_df = pd.read_sql_query(active_sql, conn)
             if not result_df.empty:
                 # Format numeric columns
+                _pct_kw  = {"pct", "margin", "ratio", "rate"}
+                _dollar_kw = {"amount","balance","wages","tax","revenue","expense","net",
+                              "cost","dep","variance","gst","itc","outstanding","charge",
+                              "current","days_31","days_61","over_90","current_0","payable",
+                              "collected","spend","total","ic_"}
                 for col in result_df.select_dtypes(include=[np.number]).columns:
-                    if any(kw in col.lower() for kw in ["amount","balance","wages","tax","revenue","expense","net","cost","dep","pct","margin","variance","gst","itc"]):
-                        if "pct" in col.lower() or "margin" in col.lower():
-                            result_df[col] = result_df[col].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "–")
-                        else:
-                            result_df[col] = result_df[col].apply(lambda x: f"${x:,.0f}" if pd.notna(x) else "–")
+                    col_l = col.lower()
+                    if any(kw in col_l for kw in _pct_kw):
+                        result_df[col] = result_df[col].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "–")
+                    elif any(kw in col_l for kw in _dollar_kw):
+                        result_df[col] = result_df[col].apply(lambda x: f"${x:,.0f}" if pd.notna(x) else "–")
+                    else:
+                        result_df[col] = result_df[col].apply(lambda x: f"{x:,}" if pd.notna(x) else "–")
                 st.dataframe(result_df, use_container_width=True, hide_index=True)
                 st.caption(f"{len(result_df)} rows returned")
             else:
@@ -3868,7 +3877,7 @@ Tax rates (SGC, Payroll Tax, FBT components) are locked by default. To edit:
 
 **Data Refresh**
 The SQLite database rebuilds automatically when the application starts and detects a schema change.
-To force a rebuild locally: delete `data/finance_data.db` and restart Streamlit.
+To force a rebuild locally: delete `data/rmit_finance.db` and restart Streamlit.
 
 **Access Control**
 This dashboard is a reporting tool — it does not write back to source systems.
